@@ -1,3 +1,5 @@
+import QRCode from 'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/+esm'
+
 // DOM要素
 const tabBtns = document.querySelectorAll('.tab-btn');
 const tabContents = document.querySelectorAll('.tab-content');
