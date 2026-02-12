@@ -275,6 +275,89 @@ function debounce(func, wait) {
     };
 }
 
+// Real-time preview update function for QR Code
+function updateQRCodePreview() {
+    const url = qrUrlInput.value.trim();
+    
+    // Only generate if URL is provided and valid
+    if (!url) {
+        return;
+    }
+    
+    // Validate URL format
+    try {
+        new URL(url);
+    } catch {
+        return;
+    }
+    
+    const title = qrTitleInput.value.trim();
+    const canvasSize = parseInt(qrCanvasSizeSelect.value);
+    const canvasWidth = canvasSize;
+    const canvasHeight = canvasSize;
+    const sizePercent = parseInt(qrSizePercentInput.value);
+    const color = qrColorInput.value;
+    const bgColor = qrBgColorInput.value;
+    const titleFontSize = parseInt(qrTitleFontSizeSelect.value);
+    const titleColor = qrTitleColorInput.value;
+    
+    generateQRCode(url, title, canvasWidth, canvasHeight, sizePercent, color, bgColor, titleFontSize, titleColor);
+}
+
+// Real-time preview update function for Overlay
+function updateOverlayPreview() {
+    const title = overlayTitleInput.value.trim();
+    
+    // Only generate if title is provided
+    if (!title) {
+        return;
+    }
+    
+    const bgColor = overlayBgColorInput.value;
+    const textColor = overlayTextColorInput.value;
+    const fontSize = parseInt(overlayFontSizeSelect.value);
+    const padding = parseInt(overlayPaddingSelect.value);
+    const width = parseInt(overlayWidthSelect.value);
+    const height = parseInt(overlayHeightSelect.value);
+    
+    generateOverlay(title, bgColor, textColor, fontSize, padding, width, height);
+}
+
+// Debounced versions for performance optimization
+const debouncedQRCodeUpdate = debounce(updateQRCodePreview, 300);
+const debouncedOverlayUpdate = debounce(updateOverlayPreview, 300);
+
+// QR Code input event listeners for real-time preview
+const qrInputElements = [
+    { element: qrUrlInput, event: 'input' },
+    { element: qrTitleInput, event: 'input' },
+    { element: qrCanvasSizeSelect, event: 'change' },
+    { element: qrSizePercentInput, event: 'input' },
+    { element: qrColorInput, event: 'input' },
+    { element: qrBgColorInput, event: 'input' },
+    { element: qrTitleFontSizeSelect, event: 'change' },
+    { element: qrTitleColorInput, event: 'input' }
+];
+
+qrInputElements.forEach(({ element, event }) => {
+    element.addEventListener(event, debouncedQRCodeUpdate);
+});
+
+// Overlay input event listeners for real-time preview
+const overlayInputElements = [
+    { element: overlayTitleInput, event: 'input' },
+    { element: overlayBgColorInput, event: 'input' },
+    { element: overlayTextColorInput, event: 'input' },
+    { element: overlayFontSizeSelect, event: 'change' },
+    { element: overlayPaddingSelect, event: 'change' },
+    { element: overlayWidthSelect, event: 'change' },
+    { element: overlayHeightSelect, event: 'change' }
+];
+
+overlayInputElements.forEach(({ element, event }) => {
+    element.addEventListener(event, debouncedOverlayUpdate);
+});
+
 // プレースホルダーの例で初期化
 document.addEventListener('DOMContentLoaded', () => {
     // デフォルト値を設定
