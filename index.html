@@ -33,33 +33,8 @@
                 <input type="text" id="qr-title" placeholder="Scan to visit" maxlength="50">
             </div>
 
-            <fieldset class="form-fieldset">
-                <legend>Canvas Size (Output Dimensions)</legend>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="qr-canvas-width">Canvas Width</label>
-                        <select id="qr-canvas-width">
-                            <option value="640">640px</option>
-                            <option value="1280">HD (1280px)</option>
-                            <option value="1920" selected>Full HD (1920px)</option>
-                            <option value="2560">QHD (2560px)</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="qr-canvas-height">Canvas Height</label>
-                        <select id="qr-canvas-height">
-                            <option value="360">360px</option>
-                            <option value="720">HD (720px)</option>
-                            <option value="1080" selected>Full HD (1080px)</option>
-                            <option value="1440">QHD (1440px)</option>
-                        </select>
-                    </div>
-                </div>
-            </fieldset>
-
             <div class="form-group">
-                <label for="qr-size-percent">QR Code Size (% of canvas height)</label>
+                <label for="qr-size-percent">QR Code Size (% of 800px canvas)</label>
                 <div class="range-container">
                     <input type="range" id="qr-size-percent" min="10" max="50" value="25" step="5">
                     <span id="qr-size-percent-value" class="range-value">25%</span>
