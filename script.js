@@ -10,7 +10,7 @@ const qrTitleInput = document.getElementById('qr-title');
 const qrCanvasSizeSelect = document.getElementById('qr-canvas-size');
 const qrSizePercentInput = document.getElementById('qr-size-percent');
 
-// Default canvas size (400 x 400 px)
+// Default canvas size (600 x 600 px)
 const qrSizePercentValue = document.getElementById('qr-size-percent-value');
 const qrColorInput = document.getElementById('qr-color');
 const qrBgColorInput = document.getElementById('qr-bg-color');
