@@ -16,7 +16,6 @@ const qrColorInput = document.getElementById('qr-color');
 const qrBgColorInput = document.getElementById('qr-bg-color');
 const qrTitleFontSizeSelect = document.getElementById('qr-title-font-size');
 const qrTitleColorInput = document.getElementById('qr-title-color');
-const generateQrBtn = document.getElementById('generate-qr');
 const qrPreview = document.getElementById('qr-preview');
 const qrCanvas = document.getElementById('qr-canvas');
 const downloadQrBtn = document.getElementById('download-qr');
@@ -34,7 +33,6 @@ const overlayFontSizeSelect = document.getElementById('overlay-font-size');
 const overlayPaddingSelect = document.getElementById('overlay-padding');
 const overlayWidthSelect = document.getElementById('overlay-width');
 const overlayHeightSelect = document.getElementById('overlay-height');
-const generateOverlayBtn = document.getElementById('generate-overlay');
 const overlayPreview = document.getElementById('overlay-preview');
 const overlayCanvas = document.getElementById('overlay-canvas');
 const downloadOverlayBtn = document.getElementById('download-overlay');
@@ -56,37 +54,6 @@ tabBtns.forEach(btn => {
             }
         });
     });
-});
-
-// QRコード生成
-generateQrBtn.addEventListener('click', () => {
-    const url = qrUrlInput.value.trim();
-    const title = qrTitleInput.value.trim();
-    const canvasSize = parseInt(qrCanvasSizeSelect.value);
-    const canvasWidth = canvasSize;
-    const canvasHeight = canvasSize;
-    const sizePercent = parseInt(qrSizePercentInput.value);
-    const color = qrColorInput.value;
-    const bgColor = qrBgColorInput.value;
-    const titleFontSize = parseInt(qrTitleFontSizeSelect.value);
-    const titleColor = qrTitleColorInput.value;
-    
-    if (!url) {
-        alert('URLを入力してください');
-        qrUrlInput.focus();
-        return;
-    }
-    
-    // URL形式の検証
-    try {
-        new URL(url);
-    } catch {
-        alert('有効なURLを入力してください（例: https://example.com）');
-        qrUrlInput.focus();
-        return;
-    }
-    
-    generateQRCode(url, title, canvasWidth, canvasHeight, sizePercent, color, bgColor, titleFontSize, titleColor);
 });
 
 function generateQRCode(url, title, canvasWidth, canvasHeight, sizePercent, color, bgColor, titleFontSize, titleColor) {
@@ -173,25 +140,6 @@ downloadQrBtn.addEventListener('click', () => {
     const title = qrTitleInput.value.trim() || 'qrcode';
     const filename = sanitizeFilename(title) + '_qrcode.png';
     downloadCanvas(qrCanvas, filename);
-});
-
-// オーバーレイ生成
-generateOverlayBtn.addEventListener('click', () => {
-    const title = overlayTitleInput.value.trim();
-    const bgColor = overlayBgColorInput.value;
-    const textColor = overlayTextColorInput.value;
-    const fontSize = parseInt(overlayFontSizeSelect.value);
-    const padding = parseInt(overlayPaddingSelect.value);
-    const width = parseInt(overlayWidthSelect.value);
-    const height = parseInt(overlayHeightSelect.value);
-    
-    if (!title) {
-        alert('イベントタイトルを入力してください');
-        overlayTitleInput.focus();
-        return;
-    }
-    
-    generateOverlay(title, bgColor, textColor, fontSize, padding, width, height);
 });
 
 function generateOverlay(title, bgColor, textColor, fontSize, padding, width, height) {
