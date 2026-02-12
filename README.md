@@ -1,66 +1,39 @@
-# StreamYard Material Creator
+# StreamYard 配信素材作成ツール
 
-A static web application for creating streaming materials for StreamYard. Generate QR codes and title overlays that can be uploaded to StreamYard's brand features.
+StreamYard用の配信素材を作成するための静的Webアプリケーションです。QRコードやタイトルオーバーレイを生成し、StreamYardのブランド機能にアップロードできます。
 
-## Features
+## 機能
 
-### QR Code Generator
+### QRコードジェネレーター
 
-Create customizable QR codes for StreamYard Brand Logo:
+StreamYard ブランドロゴ用のカスタマイズ可能なQRコードを作成:
 
-- URL encoding with validation
-- Optional title text below QR code
-- Canvas size options (200-800px)
-- QR code size percentage adjustment
-- Color customization (QR code, background, title)
-- Real-time preview
-- PNG download with transparent areas for StreamYard overlay
+- URLエンコードとバリデーション
+- QRコード下部にタイトルテキストを追加可能
+- キャンバスサイズ選択（200〜800px）
+- QRコードサイズのパーセンテージ調整
+- カラーカスタマイズ（QRコード、背景、タイトル）
+- リアルタイムプレビュー
+- StreamYardオーバーレイ用の透明領域付きPNGダウンロード
 
-### Event Title Overlay
+### イベントタイトルオーバーレイ
 
-Create transparent PNG overlays for StreamYard:
+StreamYard用の透明PNGオーバーレイを作成:
 
-- Custom event title text
-- Background and text color customization
-- Font size options (24-48px)
-- Padding adjustment
-- Resolution options: HD (1280x720), Full HD (1920x1080), QHD (2560x1440)
-- Transparent background with title bar only
-- Real-time preview
+- カスタムイベントタイトルテキスト
+- 背景色とテキスト色のカスタマイズ
+- フォントサイズ選択（24〜48px）
+- パディング調整
+- 解像度オプション: HD (1280x720)、Full HD (1920x1080)、QHD (2560x1440)
+- タイトルバーのみの透明背景
+- リアルタイムプレビュー
 
-## Usage
-
-1. Open `index.html` in a modern web browser
-2. Select the desired tab (QR Code Generator or Event Title Overlay)
-3. Configure your settings - preview updates automatically
-4. Download the generated PNG image
-5. Upload to StreamYard via **Brand** → **Logo** or **Overlay**
-
-## Project Structure
+## プロジェクト構成
 
 ```
 banner-for-jaws/
-├── index.html      # Main HTML file
-├── script.js       # JavaScript logic
-├── style.css       # Stylesheet
-└── README.md       # Documentation
+├── index.html      # メインHTMLファイル
+├── script.js       # JavaScriptロジック
+├── style.css       # スタイルシート
+└── README.md       # ドキュメント
 ```
-
-## Technical Details
-
-- **Frontend**: HTML5, CSS3 (CSS Variables, Flexbox), JavaScript (ES6+)
-- **Libraries**: QRCode.js (CDN)
-- **No build process required** - just open in browser
-
-## Deployment
-
-### GitHub Pages
-
-1. Push repository to GitHub
-2. Go to **Settings** → **Pages**
-3. Select `main` branch and `/ (root)` folder
-4. Site will be available at `https://<username>.github.io/banner-for-jaws/`
-
-### Local Development
-
-Simply open `index.html` in your browser. No server required.
