@@ -42,14 +42,35 @@
                 </select>
             </div>
 
-            <div class="form-group">
-                <label for="qr-color">QR Code Color</label>
-                <input type="color" id="qr-color" value="#000000">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="qr-color">QR Code Color</label>
+                    <input type="color" id="qr-color" value="#000000">
+                </div>
+
+                <div class="form-group">
+                    <label for="qr-bg-color">Background Color</label>
+                    <input type="color" id="qr-bg-color" value="#ffffff">
+                </div>
             </div>
 
-            <div class="form-group">
-                <label for="qr-bg-color">Background Color</label>
-                <input type="color" id="qr-bg-color" value="#ffffff">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="qr-title-font-size">Title Font Size</label>
+                    <select id="qr-title-font-size">
+                        <option value="12">12px</option>
+                        <option value="14">14px</option>
+                        <option value="16" selected>16px</option>
+                        <option value="18">18px</option>
+                        <option value="20">20px</option>
+                        <option value="24">24px</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="qr-title-color">Title Text Color</label>
+                    <input type="color" id="qr-title-color" value="#000000">
+                </div>
             </div>
             
             <button id="generate-qr" class="btn primary">Generate QR Code</button>

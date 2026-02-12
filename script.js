@@ -10,6 +10,8 @@ const qrTitleInput = document.getElementById('qr-title');
 const qrSizeSelect = document.getElementById('qr-size');
 const qrColorInput = document.getElementById('qr-color');
 const qrBgColorInput = document.getElementById('qr-bg-color');
+const qrTitleFontSizeSelect = document.getElementById('qr-title-font-size');
+const qrTitleColorInput = document.getElementById('qr-title-color');
 const generateQrBtn = document.getElementById('generate-qr');
 const qrPreview = document.getElementById('qr-preview');
 const qrCanvas = document.getElementById('qr-canvas');
@@ -54,6 +56,8 @@ generateQrBtn.addEventListener('click', () => {
     const size = parseInt(qrSizeSelect.value);
     const color = qrColorInput.value;
     const bgColor = qrBgColorInput.value;
+    const titleFontSize = parseInt(qrTitleFontSizeSelect.value);
+    const titleColor = qrTitleColorInput.value;
     
     if (!url) {
         alert('URLを入力してください');
@@ -70,15 +74,15 @@ generateQrBtn.addEventListener('click', () => {
         return;
     }
     
-    generateQRCode(url, title, size, color, bgColor);
+    generateQRCode(url, title, size, color, bgColor, titleFontSize, titleColor);
 });
 
-function generateQRCode(url, title, size, color, bgColor) {
+function generateQRCode(url, title, size, color, bgColor, titleFontSize, titleColor) {
     const ctx = qrCanvas.getContext('2d');
     
-    // キャンバスの寸法を計算
-    const titleHeight = title ? 50 : 0;
-    const padding = 20;
+    // キャンバスの寸法を計算（パディングを縮小して余白を最小化）
+    const titleHeight = title ? (titleFontSize + 12) : 0;
+    const padding = 8;
     const canvasWidth = size + (padding * 2);
     const canvasHeight = size + (padding * 2) + titleHeight;
     
@@ -111,11 +115,11 @@ function generateQRCode(url, title, size, color, bgColor) {
         
         // タイトルが指定されている場合は描画
         if (title) {
-            ctx.fillStyle = color;
-            ctx.font = 'bold 16px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+            ctx.fillStyle = titleColor;
+            ctx.font = `bold ${titleFontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText(title, canvasWidth / 2, size + padding + (titleHeight / 2) + 5);
+            ctx.fillText(title, canvasWidth / 2, size + padding + (titleHeight / 2));
         }
         
         // プレビューを表示
