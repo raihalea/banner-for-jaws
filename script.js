@@ -42,8 +42,12 @@ tabBtns.forEach(btn => {
         const targetTab = btn.dataset.tab;
         
         // アクティブなタブボタンを更新
-        tabBtns.forEach(b => b.classList.remove('active'));
+        tabBtns.forEach(b => {
+            b.classList.remove('active');
+            b.setAttribute('aria-selected', 'false');
+        });
         btn.classList.add('active');
+        btn.setAttribute('aria-selected', 'true');
         
         // 対応するコンテンツを表示
         tabContents.forEach(content => {
@@ -109,7 +113,8 @@ function generateQRCode(url, title, canvasWidth, canvasHeight, sizePercent, colo
     }, (error) => {
         if (error) {
             console.error(error);
-            alert('QRコードの生成に失敗しました。もう一度お試しください。');
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+            qrPreview.classList.add('hidden');
             return;
         }
         
@@ -160,7 +165,6 @@ function generateOverlay(title, bgColor, textColor, fontSize, padding, width, he
     const titleBarX = (width - titleBarWidth) / 2;
     
     // 角丸でタイトル背景を描画
-    const cornerRadius = 0; // 上部の角はキャンバスの上端に配置
     const bottomCornerRadius = 10;
     
     ctx.fillStyle = bgColor;
@@ -202,8 +206,7 @@ function downloadCanvas(canvas, filename) {
 
 function sanitizeFilename(name) {
     return name
-        .toLowerCase()
-        .replace(/[^a-z0-9]/g, '_')
+        .replace(/[^\p{L}\p{N}]/gu, '_')
         .replace(/_+/g, '_')
         .replace(/^_|_$/g, '')
         .substring(0, 50);
@@ -213,12 +216,8 @@ function sanitizeFilename(name) {
 function debounce(func, wait) {
     let timeout;
     return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
         clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
+        timeout = setTimeout(() => func(...args), wait);
     };
 }
 
@@ -240,15 +239,13 @@ function updateQRCodePreview() {
     
     const title = qrTitleInput.value.trim();
     const canvasSize = parseInt(qrCanvasSizeSelect.value);
-    const canvasWidth = canvasSize;
-    const canvasHeight = canvasSize;
     const sizePercent = parseInt(qrSizePercentInput.value);
     const color = qrColorInput.value;
     const bgColor = qrBgColorInput.value;
     const titleFontSize = parseInt(qrTitleFontSizeSelect.value);
     const titleColor = qrTitleColorInput.value;
-    
-    generateQRCode(url, title, canvasWidth, canvasHeight, sizePercent, color, bgColor, titleFontSize, titleColor);
+
+    generateQRCode(url, title, canvasSize, canvasSize, sizePercent, color, bgColor, titleFontSize, titleColor);
 }
 
 // Real-time preview update function for Overlay
@@ -306,10 +303,3 @@ overlayInputElements.forEach(({ element, event }) => {
     element.addEventListener(event, debouncedOverlayUpdate);
 });
 
-// プレースホルダーの例で初期化
-document.addEventListener('DOMContentLoaded', () => {
-    // デフォルト値を設定
-    qrUrlInput.value = '';
-    qrTitleInput.value = '';
-    overlayTitleInput.value = '';
-});

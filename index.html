@@ -15,13 +15,13 @@
             <p class="subtitle">Create QR codes and title overlays for your YouTube streams</p>
         </header>
 
-        <div class="tab-container">
-            <button class="tab-btn active" data-tab="qrcode">QR Code Generator</button>
-            <button class="tab-btn" data-tab="overlay">Event Title Overlay</button>
+        <div class="tab-container" role="tablist">
+            <button class="tab-btn active" data-tab="qrcode" role="tab" aria-selected="true" aria-controls="qrcode">QR Code Generator</button>
+            <button class="tab-btn" data-tab="overlay" role="tab" aria-selected="false" aria-controls="overlay">Event Title Overlay</button>
         </div>
 
         <!-- QRコードジェネレーターセクション -->
-        <section id="qrcode" class="tab-content active">
+        <section id="qrcode" class="tab-content active" role="tabpanel">
             <h2>📱 QR Code Generator</h2>
             <p class="description">Generate a QR code with a title for StreamYard Brand Logo (StreamYard compatible with transparent areas)</p>
             
@@ -49,7 +49,7 @@
             <div class="form-group">
                 <label for="qr-size-percent">QR Code Size (%)</label>
                 <div class="range-container">
-                    <input type="range" id="qr-size-percent" min="0" max="100" value="75" step="5">
+                    <input type="range" id="qr-size-percent" min="10" max="100" value="75" step="5">
                     <span id="qr-size-percent-value" class="range-value">75%</span>
                 </div>
             </div>
@@ -96,7 +96,7 @@
         </section>
 
         <!-- イベントタイトルオーバーレイセクション -->
-        <section id="overlay" class="tab-content">
+        <section id="overlay" class="tab-content" role="tabpanel">
             <h2>🎯 Event Title Overlay</h2>
             <p class="description">Create a transparent overlay with your event title for StreamYard</p>
             
