@@ -15,19 +15,20 @@
             <p class="subtitle">Create QR codes and title overlays for your YouTube streams</p>
         </header>
 
-        <div class="tab-container">
-            <button class="tab-btn active" data-tab="qrcode">QR Code Generator</button>
-            <button class="tab-btn" data-tab="overlay">Event Title Overlay</button>
+        <div class="tab-container" role="tablist" aria-label="Generator tabs">
+            <button class="tab-btn active" data-tab="qrcode" role="tab" aria-selected="true" aria-controls="qrcode" id="tab-qrcode">QR Code Generator</button>
+            <button class="tab-btn" data-tab="overlay" role="tab" aria-selected="false" aria-controls="overlay" id="tab-overlay">Event Title Overlay</button>
         </div>
 
         <!-- QRコードジェネレーターセクション -->
-        <section id="qrcode" class="tab-content active">
+        <section id="qrcode" class="tab-content active" role="tabpanel" aria-labelledby="tab-qrcode">
             <h2>📱 QR Code Generator</h2>
             <p class="description">Generate a QR code with a title for StreamYard Brand Logo (StreamYard compatible with transparent areas)</p>
             
             <div class="form-group">
                 <label for="qr-url">URL</label>
-                <input type="url" id="qr-url" placeholder="https://example.com" required>
+                <input type="url" id="qr-url" placeholder="https://example.com" required aria-describedby="qr-url-error">
+                <span id="qr-url-error" class="error-message" role="alert" aria-live="polite"></span>
             </div>
             
             <div class="form-group">
@@ -49,7 +50,7 @@
             <div class="form-group">
                 <label for="qr-size-percent">QR Code Size (%)</label>
                 <div class="range-container">
-                    <input type="range" id="qr-size-percent" min="0" max="100" value="75" step="5">
+                    <input type="range" id="qr-size-percent" min="0" max="100" value="75" step="5" aria-valuemin="0" aria-valuemax="100" aria-valuenow="75">
                     <span id="qr-size-percent-value" class="range-value">75%</span>
                 </div>
             </div>
@@ -57,12 +58,12 @@
             <div class="form-row">
                 <div class="form-group">
                     <label for="qr-color">QR Code Color</label>
-                    <input type="color" id="qr-color" value="#000000">
+                    <input type="color" id="qr-color" value="#000000" aria-label="QR Code foreground color">
                 </div>
 
                 <div class="form-group">
                     <label for="qr-bg-color">QR Background Color</label>
-                    <input type="color" id="qr-bg-color" value="#ffffff">
+                    <input type="color" id="qr-bg-color" value="#ffffff" aria-label="QR Code background color">
                 </div>
             </div>
 
@@ -81,22 +82,26 @@
 
                 <div class="form-group">
                     <label for="qr-title-color">Title Text Color</label>
-                    <input type="color" id="qr-title-color" value="#000000">
+                    <input type="color" id="qr-title-color" value="#000000" aria-label="QR Code title text color">
                 </div>
             </div>
             
             <div id="qr-preview" class="preview-container hidden">
                 <h3>Preview</h3>
                 <div class="canvas-wrapper">
-                    <canvas id="qr-canvas"></canvas>
+                    <canvas id="qr-canvas" aria-label="QR Code preview"></canvas>
                 </div>
+                <span id="qr-generation-error" class="error-message" role="alert" aria-live="polite"></span>
                 <p class="preview-note">Note: Checkered pattern indicates transparency (left and bottom areas are transparent for StreamYard overlay)</p>
-                <button id="download-qr" class="btn secondary">Download QR Code Image (PNG)</button>
+                <div class="button-group">
+                    <button id="copy-qr" class="btn tertiary">Copy to Clipboard</button>
+                    <button id="download-qr" class="btn secondary">Download QR Code Image (PNG)</button>
+                </div>
             </div>
         </section>
 
         <!-- イベントタイトルオーバーレイセクション -->
-        <section id="overlay" class="tab-content">
+        <section id="overlay" class="tab-content" role="tabpanel" aria-labelledby="tab-overlay">
             <h2>🎯 Event Title Overlay</h2>
             <p class="description">Create a transparent overlay with your event title for StreamYard</p>
             
@@ -108,12 +113,12 @@
             <div class="form-row">
                 <div class="form-group">
                     <label for="overlay-bg-color">Title Background Color</label>
-                    <input type="color" id="overlay-bg-color" value="#3883ae">
+                    <input type="color" id="overlay-bg-color" value="#3883ae" aria-label="Overlay background color">
                 </div>
                 
                 <div class="form-group">
                     <label for="overlay-text-color">Text Color</label>
-                    <input type="color" id="overlay-text-color" value="#ffffff">
+                    <input type="color" id="overlay-text-color" value="#ffffff" aria-label="Overlay text color">
                 </div>
             </div>
 
@@ -152,7 +157,7 @@
             <div id="overlay-preview" class="preview-container hidden">
                 <h3>Preview</h3>
                 <div class="canvas-wrapper">
-                    <canvas id="overlay-canvas"></canvas>
+                    <canvas id="overlay-canvas" aria-label="Overlay preview"></canvas>
                 </div>
                 <p class="preview-note">Note: Checkered pattern indicates transparency</p>
                 <button id="download-overlay" class="btn secondary">Download Overlay Image (PNG)</button>
