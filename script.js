@@ -10,7 +10,7 @@ const qrTitleInput = document.getElementById('qr-title');
 const qrCanvasSizeSelect = document.getElementById('qr-canvas-size');
 const qrSizePercentInput = document.getElementById('qr-size-percent');
 
-// Default canvas size (400 x 400 px)
+// Default canvas size (600 x 600 px)
 const qrSizePercentValue = document.getElementById('qr-size-percent-value');
 const qrColorInput = document.getElementById('qr-color');
 const qrBgColorInput = document.getElementById('qr-bg-color');
@@ -31,8 +31,7 @@ const overlayBgColorInput = document.getElementById('overlay-bg-color');
 const overlayTextColorInput = document.getElementById('overlay-text-color');
 const overlayFontSizeSelect = document.getElementById('overlay-font-size');
 const overlayPaddingSelect = document.getElementById('overlay-padding');
-const overlayWidthSelect = document.getElementById('overlay-width');
-const overlayHeightSelect = document.getElementById('overlay-height');
+const overlaySizeSelect = document.getElementById('overlay-size');
 const overlayPreview = document.getElementById('overlay-preview');
 const overlayCanvas = document.getElementById('overlay-canvas');
 const downloadOverlayBtn = document.getElementById('download-overlay');
@@ -265,8 +264,10 @@ function updateOverlayPreview() {
     const textColor = overlayTextColorInput.value;
     const fontSize = parseInt(overlayFontSizeSelect.value);
     const padding = parseInt(overlayPaddingSelect.value);
-    const width = parseInt(overlayWidthSelect.value);
-    const height = parseInt(overlayHeightSelect.value);
+    
+    // Parse width and height from combined overlay size selection
+    const sizeValue = overlaySizeSelect.value;
+    const [width, height] = sizeValue.split('x').map(v => parseInt(v));
     
     generateOverlay(title, bgColor, textColor, fontSize, padding, width, height);
 }
@@ -298,8 +299,7 @@ const overlayInputElements = [
     { element: overlayTextColorInput, event: 'input' },
     { element: overlayFontSizeSelect, event: 'change' },
     { element: overlayPaddingSelect, event: 'change' },
-    { element: overlayWidthSelect, event: 'change' },
-    { element: overlayHeightSelect, event: 'change' }
+    { element: overlaySizeSelect, event: 'change' }
 ];
 
 overlayInputElements.forEach(({ element, event }) => {

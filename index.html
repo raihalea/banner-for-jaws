@@ -38,8 +38,8 @@
                 <select id="qr-canvas-size">
                     <option value="200">200 x 200 px</option>
                     <option value="300">300 x 300 px</option>
-                    <option value="400" selected>400 x 400 px</option>
-                    <option value="600">600 x 600 px</option>
+                    <option value="400">400 x 400 px</option>
+                    <option value="600" selected>600 x 600 px</option>
                     <option value="800">800 x 800 px</option>
                 </select>
             </div>
@@ -106,7 +106,7 @@
             <div class="form-row">
                 <div class="form-group">
                     <label for="overlay-bg-color">Title Background Color</label>
-                    <input type="color" id="overlay-bg-color" value="#1a1a2e">
+                    <input type="color" id="overlay-bg-color" value="#3883aeff">
                 </div>
                 
                 <div class="form-group">
@@ -137,20 +137,13 @@
             </div>
 
             <div class="form-group">
-                <label for="overlay-width">Overlay Width</label>
-                <select id="overlay-width">
-                    <option value="1280">HD (1280px)</option>
-                    <option value="1920" selected>Full HD (1920px)</option>
-                    <option value="2560">QHD (2560px)</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="overlay-height">Overlay Height</label>
-                <select id="overlay-height">
-                    <option value="720">HD (720px)</option>
-                    <option value="1080" selected>Full HD (1080px)</option>
-                    <option value="1440">QHD (1440px)</option>
+                <label for="overlay-size">Overlay Size</label>
+                <select id="overlay-size">
+                    <option value="1920x1080" selected>1920 x 1080 (Full HD)</option>
+                    <option value="1280x720">1280 x 720 (HD)</option>
+                    <option value="2560x1440">2560 x 1440 (QHD)</option>
+                    <option value="1600x900">1600 x 900 (HD+)</option>
+                    <option value="3840x2160">3840 x 2160 (4K UHD)</option>
                 </select>
             </div>
             
