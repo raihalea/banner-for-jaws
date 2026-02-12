@@ -7,13 +7,23 @@ const tabContents = document.querySelectorAll('.tab-content');
 // QRコード要素
 const qrUrlInput = document.getElementById('qr-url');
 const qrTitleInput = document.getElementById('qr-title');
-const qrSizeSelect = document.getElementById('qr-size');
+const qrCanvasWidthSelect = document.getElementById('qr-canvas-width');
+const qrCanvasHeightSelect = document.getElementById('qr-canvas-height');
+const qrSizePercentInput = document.getElementById('qr-size-percent');
+const qrSizePercentValue = document.getElementById('qr-size-percent-value');
 const qrColorInput = document.getElementById('qr-color');
 const qrBgColorInput = document.getElementById('qr-bg-color');
+const qrTitleFontSizeSelect = document.getElementById('qr-title-font-size');
+const qrTitleColorInput = document.getElementById('qr-title-color');
 const generateQrBtn = document.getElementById('generate-qr');
 const qrPreview = document.getElementById('qr-preview');
 const qrCanvas = document.getElementById('qr-canvas');
 const downloadQrBtn = document.getElementById('download-qr');
+
+// QRサイズパーセンテージの表示更新
+qrSizePercentInput.addEventListener('input', () => {
+    qrSizePercentValue.textContent = `${qrSizePercentInput.value}%`;
+});
 
 // オーバーレイ要素
 const overlayTitleInput = document.getElementById('overlay-title');
@@ -51,9 +61,13 @@ tabBtns.forEach(btn => {
 generateQrBtn.addEventListener('click', () => {
     const url = qrUrlInput.value.trim();
     const title = qrTitleInput.value.trim();
-    const size = parseInt(qrSizeSelect.value);
+    const canvasWidth = parseInt(qrCanvasWidthSelect.value);
+    const canvasHeight = parseInt(qrCanvasHeightSelect.value);
+    const sizePercent = parseInt(qrSizePercentInput.value);
     const color = qrColorInput.value;
     const bgColor = qrBgColorInput.value;
+    const titleFontSize = parseInt(qrTitleFontSizeSelect.value);
+    const titleColor = qrTitleColorInput.value;
     
     if (!url) {
         alert('URLを入力してください');
@@ -70,30 +84,55 @@ generateQrBtn.addEventListener('click', () => {
         return;
     }
     
-    generateQRCode(url, title, size, color, bgColor);
+    generateQRCode(url, title, canvasWidth, canvasHeight, sizePercent, color, bgColor, titleFontSize, titleColor);
 });
 
-function generateQRCode(url, title, size, color, bgColor) {
+function generateQRCode(url, title, canvasWidth, canvasHeight, sizePercent, color, bgColor, titleFontSize, titleColor) {
     const ctx = qrCanvas.getContext('2d');
     
-    // キャンバスの寸法を計算
-    const titleHeight = title ? 50 : 0;
-    const padding = 20;
-    const canvasWidth = size + (padding * 2);
-    const canvasHeight = size + (padding * 2) + titleHeight;
-    
+    // キャンバスサイズを設定
     qrCanvas.width = canvasWidth;
     qrCanvas.height = canvasHeight;
     
-    // 背景を塗りつぶし
+    // キャンバスをクリア（透明背景）
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+    
+    // QRコードサイズをキャンバス高さのパーセンテージで計算
+    const qrSize = Math.floor(canvasHeight * (sizePercent / 100));
+    
+    // タイトルの高さを計算
+    const titleHeight = title ? (titleFontSize + 12) : 0;
+    
+    // QRコードとタイトルを含む背景領域のパディング
+    const padding = 8;
+    const bgWidth = qrSize + (padding * 2);
+    const bgHeight = qrSize + (padding * 2) + titleHeight;
+    
+    // 右上に配置（右端と上端からpaddingの余白を設ける）
+    const bgX = canvasWidth - bgWidth - padding;
+    const bgY = padding;
+    
+    // QRコード背景を描画（角丸付き）
+    const cornerRadius = 8;
     ctx.fillStyle = bgColor;
-    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+    ctx.beginPath();
+    ctx.moveTo(bgX + cornerRadius, bgY);
+    ctx.lineTo(bgX + bgWidth - cornerRadius, bgY);
+    ctx.quadraticCurveTo(bgX + bgWidth, bgY, bgX + bgWidth, bgY + cornerRadius);
+    ctx.lineTo(bgX + bgWidth, bgY + bgHeight - cornerRadius);
+    ctx.quadraticCurveTo(bgX + bgWidth, bgY + bgHeight, bgX + bgWidth - cornerRadius, bgY + bgHeight);
+    ctx.lineTo(bgX + cornerRadius, bgY + bgHeight);
+    ctx.quadraticCurveTo(bgX, bgY + bgHeight, bgX, bgY + bgHeight - cornerRadius);
+    ctx.lineTo(bgX, bgY + cornerRadius);
+    ctx.quadraticCurveTo(bgX, bgY, bgX + cornerRadius, bgY);
+    ctx.closePath();
+    ctx.fill();
     
     // QRコード用の一時キャンバスを作成
     const tempCanvas = document.createElement('canvas');
     
     QRCode.toCanvas(tempCanvas, url, {
-        width: size,
+        width: qrSize,
         margin: 0,
         color: {
             dark: color,
@@ -106,16 +145,20 @@ function generateQRCode(url, title, size, color, bgColor) {
             return;
         }
         
-        // メインキャンバスにQRコードを描画
-        ctx.drawImage(tempCanvas, padding, padding);
+        // QRコードを右上背景領域内に描画
+        const qrX = bgX + padding;
+        const qrY = bgY + padding;
+        ctx.drawImage(tempCanvas, qrX, qrY);
         
         // タイトルが指定されている場合は描画
         if (title) {
-            ctx.fillStyle = color;
-            ctx.font = 'bold 16px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+            ctx.fillStyle = titleColor;
+            ctx.font = `bold ${titleFontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText(title, canvasWidth / 2, size + padding + (titleHeight / 2) + 5);
+            const titleX = bgX + (bgWidth / 2);
+            const titleY = bgY + padding + qrSize + (titleHeight / 2);
+            ctx.fillText(title, titleX, titleY);
         }
         
         // プレビューを表示

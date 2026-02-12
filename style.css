@@ -181,6 +181,85 @@ input[type="color"]::-webkit-color-swatch {
     border-radius: 6px;
 }
 
+/* フィールドセット */
+.form-fieldset {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.form-fieldset legend {
+    padding: 0 0.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.form-fieldset .form-row {
+    margin-bottom: 0;
+}
+
+.form-fieldset .form-group {
+    margin-bottom: 0;
+}
+
+/* レンジスライダー */
+.range-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+input[type="range"] {
+    flex: 1;
+    height: 8px;
+    background: var(--surface-light);
+    border-radius: 4px;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+    background: var(--primary-hover);
+    transform: scale(1.1);
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: var(--primary-color);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+    background: var(--primary-hover);
+    transform: scale(1.1);
+}
+
+.range-value {
+    min-width: 50px;
+    text-align: center;
+    font-weight: 600;
+    color: var(--primary-color);
+    font-size: 1rem;
+}
+
 /* ボタン */
 .btn {
     display: inline-block;
