@@ -1,152 +1,66 @@
-# StreamYard 素材作成ツール
+# StreamYard Material Creator
 
-StreamYardで使用するYouTubeストリーミング素材を作成するための静的Webアプリケーションです。このツールは、StreamYardのブランド機能にアップロードできるQRコードやタイトルオーバーレイの生成をサポートします。
+A static web application for creating streaming materials for StreamYard. Generate QR codes and title overlays that can be uploaded to StreamYard's brand features.
 
-## 🚀 ライブデモ
+## Features
 
-GitHub Pagesのデプロイメントにアクセス: `https://<your-username>.github.io/banner-for-jaws/`
+### QR Code Generator
 
-## ✨ 機能
+Create customizable QR codes for StreamYard Brand Logo:
 
-### 📱 QRコードジェネレーター
+- URL encoding with validation
+- Optional title text below QR code
+- Canvas size options (200-800px)
+- QR code size percentage adjustment
+- Color customization (QR code, background, title)
+- Real-time preview
+- PNG download with transparent areas for StreamYard overlay
 
-StreamYardブランドロゴ用のカスタマイズ可能なQRコードを作成:
+### Event Title Overlay
 
-- **URL入力**: 任意の有効なURLをQRコードにエンコード
-- **タイトルテキスト**: QRコードの下に表示される説明テキストを追加
-- **サイズオプション**: 小 (200x200)、中 (300x300)、大 (400x400) から選択
-- **色のカスタマイズ**: QRコードの色と背景色を設定
-- **ダウンロード**: 生成した画像をPNG形式で保存してStreamYardにアップロード
+Create transparent PNG overlays for StreamYard:
 
-**使用例**: ライブ配信中にSNS、寄付ページ、イベント登録などのリンクを共有するのに最適です。
+- Custom event title text
+- Background and text color customization
+- Font size options (24-48px)
+- Padding adjustment
+- Resolution options: HD (1280x720), Full HD (1920x1080), QHD (2560x1440)
+- Transparent background with title bar only
+- Real-time preview
 
-### 🎯 イベントタイトルオーバーレイ
+## Usage
 
-StreamYardのオーバーレイ機能用の透明PNG画像を作成:
+1. Open `index.html` in a modern web browser
+2. Select the desired tab (QR Code Generator or Event Title Overlay)
+3. Configure your settings - preview updates automatically
+4. Download the generated PNG image
+5. Upload to StreamYard via **Brand** → **Logo** or **Overlay**
 
-- **イベントタイトル**: イベントまたは配信のタイトルを入力
-- **色のカスタマイズ**: 背景色とテキスト色を選択
-- **フォントサイズ**: 小、中、大、特大から選択
-- **パディング調整**: タイトル周りの余白を調整
-- **解像度オプション**: HD (1280x720)、フルHD (1920x1080)、QHD (2560x1440)
-- **透明背景**: タイトルバー以外は透明な画像を生成
-
-**使用例**: StreamYardのオーバーレイ機能を使用して、配信画面の上部にイベントタイトルを表示します。
-
-## 📖 使い方
-
-### QRコードジェネレーター
-
-1. **QRコードジェネレーター** タブに移動
-2. エンコードしたいURLを入力（例: `https://twitter.com/yourusername`）
-3. 必要に応じてタイトルテキストを追加（例: 「フォローしてね！」）
-4. サイズと色をお好みでカスタマイズ
-5. **QRコードを生成** をクリック
-6. プレビューを確認し、**QRコード画像をダウンロード** をクリック
-7. StreamYardで **ブランド** → **ロゴ** に移動し、ダウンロードした画像をアップロード
-
-### イベントタイトルオーバーレイ
-
-1. **イベントタイトルオーバーレイ** タブに移動
-2. イベントタイトルを入力（例: 「AWS User Group Meetup #42」）
-3. お好みの背景色とテキスト色を選択
-4. フォントサイズとパディングを調整
-5. 配信出力に合わせた解像度を選択
-6. **オーバーレイを生成** をクリック
-7. プレビューを確認（チェック柄は透明部分を示します）
-8. **オーバーレイ画像をダウンロード (PNG)** をクリック
-9. StreamYardで **ブランド** → **オーバーレイ** に移動し、ダウンロードした画像をアップロード
-
-## 🛠️ 技術詳細
-
-### 動作要件
-
-- モダンなWebブラウザ（Chrome、Firefox、Safari、Edge）
-- JavaScript有効
-
-### 使用技術
-
-- **HTML5**: 構造とセマンティクス
-- **CSS3**: CSS変数とFlexboxによるスタイリング
-- **JavaScript (ES6+)**: クライアントサイドロジック
-- **Canvas API**: 画像の生成と操作
-- **QRCode.js**: QRコード生成ライブラリ（CDN経由）
-
-### ブラウザ互換性
-
-- Chrome 60+
-- Firefox 55+
-- Safari 11+
-- Edge 79+
-
-## 📦 デプロイメント
-
-### GitHub Pages
-
-1. このリポジトリをGitHubにプッシュ
-2. リポジトリの **Settings** → **Pages** に移動
-3. 「Source」で **Deploy from a branch** を選択
-4. `main` ブランチと `/ (root)` フォルダを選択
-5. **Save** をクリック
-6. サイトは `https://<username>.github.io/<repository-name>/` で利用可能になります
-
-### ローカル開発
-
-Webブラウザで `index.html` を開くだけです。ビルドプロセスやサーバーは不要です！
-
-```bash
-# リポジトリをクローン
-git clone https://github.com/yourusername/banner-for-jaws.git
-
-# ブラウザで開く
-open index.html
-# または
-xdg-open index.html  # Linux
-start index.html     # Windows
-```
-
-## 📁 プロジェクト構成
+## Project Structure
 
 ```
 banner-for-jaws/
-├── index.html      # メインHTMLファイル
-├── style.css       # スタイルシート
-├── script.js       # JavaScriptロジック
-└── README.md       # このファイル
+├── index.html      # Main HTML file
+├── script.js       # JavaScript logic
+├── style.css       # Stylesheet
+└── README.md       # Documentation
 ```
 
-## 🎨 StreamYard連携のコツ
+## Technical Details
 
-### ブランドロゴとしてのQRコード
+- **Frontend**: HTML5, CSS3 (CSS Variables, Flexbox), JavaScript (ES6+)
+- **Libraries**: QRCode.js (CDN)
+- **No build process required** - just open in browser
 
-1. 適切なサイズ（300x300推奨）でQRコードを生成
-2. 配信背景とのコントラストが良い色を選択
-3. StreamYard Studioで **ブランド** アイコン（ペイントブラシ）をクリック
-4. **ロゴ** セクションに移動
-5. QRコード画像をアップロード
-6. 他のコンテンツと重ならない隅に配置
+## Deployment
 
-### タイトルオーバーレイ
+### GitHub Pages
 
-1. 配信解像度に合わせたオーバーレイを生成
-2. 透明背景によりタイトルバーのみが表示されます
-3. StreamYard Studioで **ブランド** アイコンをクリック
-4. **オーバーレイ** セクションに移動
-5. オーバーレイ画像をアップロード
-6. 配信中に必要に応じてオン/オフを切り替え
+1. Push repository to GitHub
+2. Go to **Settings** → **Pages**
+3. Select `main` branch and `/ (root)` folder
+4. Site will be available at `https://<username>.github.io/banner-for-jaws/`
 
-## 📄 ライセンス
+### Local Development
 
-このプロジェクトはオープンソースであり、個人および商用利用が可能です。
-
-## 🤝 貢献
-
-貢献を歓迎します！以下のことができます：
-
-- バグの報告
-- 新機能の提案
-- プルリクエストの送信
-
-## 📞 サポート
-
-問題が発生した場合や質問がある場合は、GitHubでIssueを作成してください。
+Simply open `index.html` in your browser. No server required.
