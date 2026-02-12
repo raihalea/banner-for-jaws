@@ -7,11 +7,10 @@ const tabContents = document.querySelectorAll('.tab-content');
 // QRコード要素
 const qrUrlInput = document.getElementById('qr-url');
 const qrTitleInput = document.getElementById('qr-title');
+const qrCanvasSizeSelect = document.getElementById('qr-canvas-size');
 const qrSizePercentInput = document.getElementById('qr-size-percent');
 
-// Fixed canvas size (800 x 800 px)
-const QR_CANVAS_WIDTH = 800;
-const QR_CANVAS_HEIGHT = 800;
+// Default canvas size (400 x 400 px)
 const qrSizePercentValue = document.getElementById('qr-size-percent-value');
 const qrColorInput = document.getElementById('qr-color');
 const qrBgColorInput = document.getElementById('qr-bg-color');
@@ -63,8 +62,9 @@ tabBtns.forEach(btn => {
 generateQrBtn.addEventListener('click', () => {
     const url = qrUrlInput.value.trim();
     const title = qrTitleInput.value.trim();
-    const canvasWidth = QR_CANVAS_WIDTH;
-    const canvasHeight = QR_CANVAS_HEIGHT;
+    const canvasSize = parseInt(qrCanvasSizeSelect.value);
+    const canvasWidth = canvasSize;
+    const canvasHeight = canvasSize;
     const sizePercent = parseInt(qrSizePercentInput.value);
     const color = qrColorInput.value;
     const bgColor = qrBgColorInput.value;

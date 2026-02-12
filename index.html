@@ -34,10 +34,21 @@
             </div>
 
             <div class="form-group">
-                <label for="qr-size-percent">QR Code Size (% of 800px canvas)</label>
+                <label for="qr-canvas-size">Canvas Size</label>
+                <select id="qr-canvas-size">
+                    <option value="200">200 x 200 px</option>
+                    <option value="300">300 x 300 px</option>
+                    <option value="400" selected>400 x 400 px</option>
+                    <option value="600">600 x 600 px</option>
+                    <option value="800">800 x 800 px</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="qr-size-percent">QR Code Size (%)</label>
                 <div class="range-container">
-                    <input type="range" id="qr-size-percent" min="10" max="50" value="25" step="5">
-                    <span id="qr-size-percent-value" class="range-value">25%</span>
+                    <input type="range" id="qr-size-percent" min="0" max="100" value="75" step="5">
+                    <span id="qr-size-percent-value" class="range-value">75%</span>
                 </div>
             </div>
 
@@ -57,12 +68,12 @@
                 <div class="form-group">
                     <label for="qr-title-font-size">Title Font Size</label>
                     <select id="qr-title-font-size">
-                        <option value="12">12px</option>
-                        <option value="14">14px</option>
-                        <option value="16" selected>16px</option>
-                        <option value="18">18px</option>
-                        <option value="20">20px</option>
-                        <option value="24">24px</option>
+                        <option value="24" selected>24px</option>
+                        <option value="28">28px</option>
+                        <option value="32">32px</option>
+                        <option value="36">36px</option>
+                        <option value="40">40px</option>
+                        <option value="48">48px</option>
                     </select>
                 </div>
 
