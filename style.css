@@ -182,29 +182,6 @@ input[type="color"]::-webkit-color-swatch {
     border-radius: 6px;
 }
 
-/* フィールドセット */
-.form-fieldset {
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 1rem;
-    margin-bottom: 1.25rem;
-}
-
-.form-fieldset legend {
-    padding: 0 0.5rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    font-size: 0.9rem;
-}
-
-.form-fieldset .form-row {
-    margin-bottom: 0;
-}
-
-.form-fieldset .form-group {
-    margin-bottom: 0;
-}
-
 /* レンジスライダー */
 .range-container {
     display: flex;
