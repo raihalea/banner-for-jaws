@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StreamYard Material Creator</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎬 StreamYard Material Creator</h1>
+            <p class="subtitle">Create QR codes and title overlays for your YouTube streams</p>
+        </header>
+
+        <div class="tab-container">
+            <button class="tab-btn active" data-tab="qrcode">QR Code Generator</button>
+            <button class="tab-btn" data-tab="overlay">Event Title Overlay</button>
+        </div>
+
+        <!-- QRコードジェネレーターセクション -->
+        <section id="qrcode" class="tab-content active">
+            <h2>📱 QR Code Generator</h2>
+            <p class="description">Generate a QR code with a title for StreamYard Brand Logo</p>
+            
+            <div class="form-group">
+                <label for="qr-url">URL</label>
+                <input type="url" id="qr-url" placeholder="https://example.com" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="qr-title">Title</label>
+                <input type="text" id="qr-title" placeholder="Scan to visit" maxlength="50">
+            </div>
+
+            <div class="form-group">
+                <label for="qr-size">QR Code Size</label>
+                <select id="qr-size">
+                    <option value="200">Small (200x200)</option>
+                    <option value="300" selected>Medium (300x300)</option>
+                    <option value="400">Large (400x400)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="qr-color">QR Code Color</label>
+                <input type="color" id="qr-color" value="#000000">
+            </div>
+
+            <div class="form-group">
+                <label for="qr-bg-color">Background Color</label>
+                <input type="color" id="qr-bg-color" value="#ffffff">
+            </div>
+            
+            <button id="generate-qr" class="btn primary">Generate QR Code</button>
+            
+            <div id="qr-preview" class="preview-container hidden">
+                <h3>Preview</h3>
+                <canvas id="qr-canvas"></canvas>
+                <button id="download-qr" class="btn secondary">Download QR Code Image</button>
+            </div>
+        </section>
+
+        <!-- イベントタイトルオーバーレイセクション -->
+        <section id="overlay" class="tab-content">
+            <h2>🎯 Event Title Overlay</h2>
+            <p class="description">Create a transparent overlay with your event title for StreamYard</p>
+            
+            <div class="form-group">
+                <label for="overlay-title">Event Title</label>
+                <input type="text" id="overlay-title" placeholder="My Awesome Event" maxlength="100">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="overlay-bg-color">Title Background Color</label>
+                    <input type="color" id="overlay-bg-color" value="#1a1a2e">
+                </div>
+                
+                <div class="form-group">
+                    <label for="overlay-text-color">Text Color</label>
+                    <input type="color" id="overlay-text-color" value="#ffffff">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="overlay-font-size">Font Size</label>
+                    <select id="overlay-font-size">
+                        <option value="24">Small (24px)</option>
+                        <option value="32" selected>Medium (32px)</option>
+                        <option value="40">Large (40px)</option>
+                        <option value="48">Extra Large (48px)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="overlay-padding">Padding</label>
+                    <select id="overlay-padding">
+                        <option value="10">Small (10px)</option>
+                        <option value="20" selected>Medium (20px)</option>
+                        <option value="30">Large (30px)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="overlay-width">Overlay Width</label>
+                <select id="overlay-width">
+                    <option value="1280">HD (1280px)</option>
+                    <option value="1920" selected>Full HD (1920px)</option>
+                    <option value="2560">QHD (2560px)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="overlay-height">Overlay Height</label>
+                <select id="overlay-height">
+                    <option value="720">HD (720px)</option>
+                    <option value="1080" selected>Full HD (1080px)</option>
+                    <option value="1440">QHD (1440px)</option>
+                </select>
+            </div>
+            
+            <button id="generate-overlay" class="btn primary">Generate Overlay</button>
+            
+            <div id="overlay-preview" class="preview-container hidden">
+                <h3>Preview</h3>
+                <div class="canvas-wrapper">
+                    <canvas id="overlay-canvas"></canvas>
+                </div>
+                <p class="preview-note">Note: Checkered pattern indicates transparency</p>
+                <button id="download-overlay" class="btn secondary">Download Overlay Image (PNG)</button>
+            </div>
+        </section>
+
+        <footer>
+            <p>Made with ❤️ for streamers</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
