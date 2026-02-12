@@ -12,6 +12,7 @@
     --border-color: #475569;
     --success: #22c55e;
     --error: #ef4444;
+    --info: #3b82f6;
 }
 
 /* リセットと基本スタイル */
@@ -275,6 +276,29 @@ input[type="range"]::-moz-range-thumb:hover {
     box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
 }
 
+.btn.tertiary {
+    width: 100%;
+    background: var(--info);
+    color: white;
+    margin-top: 1rem;
+}
+
+.btn.tertiary:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.button-group .btn {
+    margin-top: 0.5rem;
+}
+
 /* プレビューコンテナ */
 .preview-container {
     margin-top: 2rem;
@@ -319,9 +343,28 @@ input[type="range"]::-moz-range-thumb:hover {
     font-style: italic;
 }
 
-/* 非表示クラス */
-.hidden {
-    display: none !important;
+/* 非表示クラス（詳細度で解決） */
+.preview-container.hidden {
+    display: none;
+}
+
+/* エラーメッセージ */
+.error-message {
+    display: block;
+    color: var(--error);
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    min-height: 1.2em;
+}
+
+.error-message:empty {
+    display: none;
+}
+
+/* 入力エラー状態 */
+input.input-error {
+    border-color: var(--error);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
 }
 
 /* フッター */

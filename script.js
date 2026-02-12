@@ -1,305 +1,443 @@
 import QRCode from 'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/+esm'
 
-// DOM要素
-const tabBtns = document.querySelectorAll('.tab-btn');
-const tabContents = document.querySelectorAll('.tab-content');
+// Application Module Pattern
+const App = (() => {
+    // Private: Blocked URL schemes for security
+    const BLOCKED_SCHEMES = ['javascript:', 'data:', 'vbscript:'];
 
-// QRコード要素
-const qrUrlInput = document.getElementById('qr-url');
-const qrTitleInput = document.getElementById('qr-title');
-const qrCanvasSizeSelect = document.getElementById('qr-canvas-size');
-const qrSizePercentInput = document.getElementById('qr-size-percent');
+    // Private: LocalStorage key
+    const STORAGE_KEY = 'streamyard-material-creator-settings';
 
-// Default canvas size (600 x 600 px)
-const qrSizePercentValue = document.getElementById('qr-size-percent-value');
-const qrColorInput = document.getElementById('qr-color');
-const qrBgColorInput = document.getElementById('qr-bg-color');
-const qrTitleFontSizeSelect = document.getElementById('qr-title-font-size');
-const qrTitleColorInput = document.getElementById('qr-title-color');
-const qrPreview = document.getElementById('qr-preview');
-const qrCanvas = document.getElementById('qr-canvas');
-const downloadQrBtn = document.getElementById('download-qr');
+    // Private: Debounce timeout for color inputs (ms)
+    const COLOR_DEBOUNCE_MS = 500;
 
-// QRサイズパーセンテージの表示更新
-qrSizePercentInput.addEventListener('input', () => {
-    qrSizePercentValue.textContent = `${qrSizePercentInput.value}%`;
-});
+    // Private: DOM Elements
+    const elements = {
+        tabBtns: document.querySelectorAll('.tab-btn'),
+        tabContents: document.querySelectorAll('.tab-content'),
+        // QR Code elements
+        qrUrlInput: document.getElementById('qr-url'),
+        qrUrlError: document.getElementById('qr-url-error'),
+        qrGenerationError: document.getElementById('qr-generation-error'),
+        qrTitleInput: document.getElementById('qr-title'),
+        qrCanvasSizeSelect: document.getElementById('qr-canvas-size'),
+        qrSizePercentInput: document.getElementById('qr-size-percent'),
+        qrSizePercentValue: document.getElementById('qr-size-percent-value'),
+        qrColorInput: document.getElementById('qr-color'),
+        qrBgColorInput: document.getElementById('qr-bg-color'),
+        qrTitleFontSizeSelect: document.getElementById('qr-title-font-size'),
+        qrTitleColorInput: document.getElementById('qr-title-color'),
+        qrPreview: document.getElementById('qr-preview'),
+        qrCanvas: document.getElementById('qr-canvas'),
+        downloadQrBtn: document.getElementById('download-qr'),
+        copyQrBtn: document.getElementById('copy-qr'),
+        // Overlay elements
+        overlayTitleInput: document.getElementById('overlay-title'),
+        overlayBgColorInput: document.getElementById('overlay-bg-color'),
+        overlayTextColorInput: document.getElementById('overlay-text-color'),
+        overlayFontSizeSelect: document.getElementById('overlay-font-size'),
+        overlayPaddingSelect: document.getElementById('overlay-padding'),
+        overlaySizeSelect: document.getElementById('overlay-size'),
+        overlayPreview: document.getElementById('overlay-preview'),
+        overlayCanvas: document.getElementById('overlay-canvas'),
+        downloadOverlayBtn: document.getElementById('download-overlay')
+    };
 
-// オーバーレイ要素
-const overlayTitleInput = document.getElementById('overlay-title');
-const overlayBgColorInput = document.getElementById('overlay-bg-color');
-const overlayTextColorInput = document.getElementById('overlay-text-color');
-const overlayFontSizeSelect = document.getElementById('overlay-font-size');
-const overlayPaddingSelect = document.getElementById('overlay-padding');
-const overlaySizeSelect = document.getElementById('overlay-size');
-const overlayPreview = document.getElementById('overlay-preview');
-const overlayCanvas = document.getElementById('overlay-canvas');
-const downloadOverlayBtn = document.getElementById('download-overlay');
+    // Private: Utility functions
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func(...args), wait);
+        };
+    }
 
-// タブ切り替え
-tabBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-        const targetTab = btn.dataset.tab;
-        
-        // アクティブなタブボタンを更新
-        tabBtns.forEach(b => {
-            b.classList.remove('active');
-            b.setAttribute('aria-selected', 'false');
-        });
-        btn.classList.add('active');
-        btn.setAttribute('aria-selected', 'true');
-        
-        // 対応するコンテンツを表示
-        tabContents.forEach(content => {
-            content.classList.remove('active');
-            if (content.id === targetTab) {
-                content.classList.add('active');
-            }
-        });
-    });
-});
+    function sanitizeFilename(name) {
+        return name
+            .replace(/[^\p{L}\p{N}]/gu, '_')
+            .replace(/_+/g, '_')
+            .replace(/^_|_$/g, '')
+            .substring(0, 50);
+    }
 
-function generateQRCode(url, title, canvasWidth, canvasHeight, sizePercent, color, bgColor, titleFontSize, titleColor) {
-    const ctx = qrCanvas.getContext('2d');
-    
-    // キャンバスサイズを設定
-    qrCanvas.width = canvasWidth;
-    qrCanvas.height = canvasHeight;
-    
-    // キャンバスをクリア（透明背景）
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-    
-    // QRコードサイズをキャンバス高さのパーセンテージで計算
-    const qrSize = Math.floor(canvasHeight * (sizePercent / 100));
-    
-    // タイトルの高さを計算
-    const titleHeight = title ? (titleFontSize + 12) : 0;
-    
-    // QRコードとタイトルを含む背景領域のパディング
-    const padding = 8;
-    const bgWidth = qrSize + (padding * 2);
-    const bgHeight = qrSize + (padding * 2) + titleHeight;
-    
-    // 右上に配置（右端と上端からpaddingの余白を設ける）
-    const bgX = canvasWidth - bgWidth - padding;
-    const bgY = padding;
-    
-    // QRコード背景を描画（角丸付き）
-    const cornerRadius = 8;
-    ctx.fillStyle = bgColor;
-    ctx.beginPath();
-    ctx.moveTo(bgX + cornerRadius, bgY);
-    ctx.lineTo(bgX + bgWidth - cornerRadius, bgY);
-    ctx.quadraticCurveTo(bgX + bgWidth, bgY, bgX + bgWidth, bgY + cornerRadius);
-    ctx.lineTo(bgX + bgWidth, bgY + bgHeight - cornerRadius);
-    ctx.quadraticCurveTo(bgX + bgWidth, bgY + bgHeight, bgX + bgWidth - cornerRadius, bgY + bgHeight);
-    ctx.lineTo(bgX + cornerRadius, bgY + bgHeight);
-    ctx.quadraticCurveTo(bgX, bgY + bgHeight, bgX, bgY + bgHeight - cornerRadius);
-    ctx.lineTo(bgX, bgY + cornerRadius);
-    ctx.quadraticCurveTo(bgX, bgY, bgX + cornerRadius, bgY);
-    ctx.closePath();
-    ctx.fill();
-    
-    // QRコード用の一時キャンバスを作成
-    const tempCanvas = document.createElement('canvas');
-    
-    QRCode.toCanvas(tempCanvas, url, {
-        width: qrSize,
-        margin: 0,
-        color: {
-            dark: color,
-            light: bgColor
+    function downloadCanvas(canvas, filename) {
+        const link = document.createElement('a');
+        link.download = filename;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    }
+
+    // Private: URL validation with security checks
+    function validateUrl(url) {
+        if (!url) {
+            return { valid: false, error: '' };
         }
-    }, (error) => {
-        if (error) {
-            console.error(error);
-            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-            qrPreview.classList.add('hidden');
+
+        // Check for blocked schemes
+        const lowerUrl = url.toLowerCase().trim();
+        for (const scheme of BLOCKED_SCHEMES) {
+            if (lowerUrl.startsWith(scheme)) {
+                return { valid: false, error: `URL scheme "${scheme}" is not allowed for security reasons.` };
+            }
+        }
+
+        // Validate URL format
+        try {
+            const parsed = new URL(url);
+            // Only allow http and https
+            if (!['http:', 'https:'].includes(parsed.protocol)) {
+                return { valid: false, error: `Only HTTP and HTTPS URLs are allowed.` };
+            }
+            return { valid: true, error: '' };
+        } catch {
+            return { valid: false, error: 'Please enter a valid URL (e.g., https://example.com)' };
+        }
+    }
+
+    // Private: Show/hide error messages
+    function showError(element, message) {
+        if (element) {
+            element.textContent = message;
+        }
+    }
+
+    function clearError(element) {
+        if (element) {
+            element.textContent = '';
+        }
+    }
+
+    // Private: LocalStorage functions
+    function saveSettings() {
+        const settings = {
+            qr: {
+                url: elements.qrUrlInput.value,
+                title: elements.qrTitleInput.value,
+                canvasSize: elements.qrCanvasSizeSelect.value,
+                sizePercent: elements.qrSizePercentInput.value,
+                color: elements.qrColorInput.value,
+                bgColor: elements.qrBgColorInput.value,
+                titleFontSize: elements.qrTitleFontSizeSelect.value,
+                titleColor: elements.qrTitleColorInput.value
+            },
+            overlay: {
+                title: elements.overlayTitleInput.value,
+                bgColor: elements.overlayBgColorInput.value,
+                textColor: elements.overlayTextColorInput.value,
+                fontSize: elements.overlayFontSizeSelect.value,
+                padding: elements.overlayPaddingSelect.value,
+                size: elements.overlaySizeSelect.value
+            }
+        };
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+        } catch (e) {
+            console.warn('Failed to save settings to localStorage:', e);
+        }
+    }
+
+    function loadSettings() {
+        try {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (!stored) return;
+
+            const settings = JSON.parse(stored);
+
+            // QR settings
+            if (settings.qr) {
+                if (settings.qr.url) elements.qrUrlInput.value = settings.qr.url;
+                if (settings.qr.title) elements.qrTitleInput.value = settings.qr.title;
+                if (settings.qr.canvasSize) elements.qrCanvasSizeSelect.value = settings.qr.canvasSize;
+                if (settings.qr.sizePercent) {
+                    elements.qrSizePercentInput.value = settings.qr.sizePercent;
+                    elements.qrSizePercentValue.textContent = `${settings.qr.sizePercent}%`;
+                }
+                if (settings.qr.color) elements.qrColorInput.value = settings.qr.color;
+                if (settings.qr.bgColor) elements.qrBgColorInput.value = settings.qr.bgColor;
+                if (settings.qr.titleFontSize) elements.qrTitleFontSizeSelect.value = settings.qr.titleFontSize;
+                if (settings.qr.titleColor) elements.qrTitleColorInput.value = settings.qr.titleColor;
+            }
+
+            // Overlay settings
+            if (settings.overlay) {
+                if (settings.overlay.title) elements.overlayTitleInput.value = settings.overlay.title;
+                if (settings.overlay.bgColor) elements.overlayBgColorInput.value = settings.overlay.bgColor;
+                if (settings.overlay.textColor) elements.overlayTextColorInput.value = settings.overlay.textColor;
+                if (settings.overlay.fontSize) elements.overlayFontSizeSelect.value = settings.overlay.fontSize;
+                if (settings.overlay.padding) elements.overlayPaddingSelect.value = settings.overlay.padding;
+                if (settings.overlay.size) elements.overlaySizeSelect.value = settings.overlay.size;
+            }
+        } catch (e) {
+            console.warn('Failed to load settings from localStorage:', e);
+        }
+    }
+
+    // Private: QR Code generation
+    function generateQRCode(url, title, canvasWidth, canvasHeight, sizePercent, color, bgColor, titleFontSize, titleColor) {
+        const ctx = elements.qrCanvas.getContext('2d');
+
+        elements.qrCanvas.width = canvasWidth;
+        elements.qrCanvas.height = canvasHeight;
+        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+        const qrSize = Math.floor(canvasHeight * (sizePercent / 100));
+        const titleHeight = title ? (titleFontSize + 12) : 0;
+        const padding = 8;
+        const bgWidth = qrSize + (padding * 2);
+        const bgHeight = qrSize + (padding * 2) + titleHeight;
+        const bgX = canvasWidth - bgWidth - padding;
+        const bgY = padding;
+
+        const cornerRadius = 8;
+        ctx.fillStyle = bgColor;
+        ctx.beginPath();
+        ctx.moveTo(bgX + cornerRadius, bgY);
+        ctx.lineTo(bgX + bgWidth - cornerRadius, bgY);
+        ctx.quadraticCurveTo(bgX + bgWidth, bgY, bgX + bgWidth, bgY + cornerRadius);
+        ctx.lineTo(bgX + bgWidth, bgY + bgHeight - cornerRadius);
+        ctx.quadraticCurveTo(bgX + bgWidth, bgY + bgHeight, bgX + bgWidth - cornerRadius, bgY + bgHeight);
+        ctx.lineTo(bgX + cornerRadius, bgY + bgHeight);
+        ctx.quadraticCurveTo(bgX, bgY + bgHeight, bgX, bgY + bgHeight - cornerRadius);
+        ctx.lineTo(bgX, bgY + cornerRadius);
+        ctx.quadraticCurveTo(bgX, bgY, bgX + cornerRadius, bgY);
+        ctx.closePath();
+        ctx.fill();
+
+        const tempCanvas = document.createElement('canvas');
+
+        QRCode.toCanvas(tempCanvas, url, {
+            width: qrSize,
+            margin: 0,
+            color: { dark: color, light: bgColor }
+        }, (error) => {
+            if (error) {
+                console.error(error);
+                showError(elements.qrGenerationError, 'Failed to generate QR code. Please try again.');
+                return;
+            }
+
+            clearError(elements.qrGenerationError);
+            const qrX = bgX + padding;
+            const qrY = bgY + padding;
+            ctx.drawImage(tempCanvas, qrX, qrY);
+
+            if (title) {
+                ctx.fillStyle = titleColor;
+                ctx.font = `bold ${titleFontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                const titleX = bgX + (bgWidth / 2);
+                const titleY = bgY + padding + qrSize + (titleHeight / 2);
+                ctx.fillText(title, titleX, titleY);
+            }
+
+            elements.qrPreview.classList.remove('hidden');
+        });
+    }
+
+    // Private: Overlay generation
+    function generateOverlay(title, bgColor, textColor, fontSize, padding, width, height) {
+        const ctx = elements.overlayCanvas.getContext('2d');
+
+        elements.overlayCanvas.width = width;
+        elements.overlayCanvas.height = height;
+        ctx.clearRect(0, 0, width, height);
+
+        ctx.font = `bold ${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+        const textMetrics = ctx.measureText(title);
+        const textWidth = textMetrics.width;
+        const titleBarHeight = fontSize + (padding * 2);
+        const titleBarWidth = Math.min(textWidth + (padding * 4), width);
+        const titleBarX = (width - titleBarWidth) / 2;
+
+        const bottomCornerRadius = 10;
+        ctx.fillStyle = bgColor;
+        ctx.beginPath();
+        ctx.moveTo(titleBarX, 0);
+        ctx.lineTo(titleBarX + titleBarWidth, 0);
+        ctx.lineTo(titleBarX + titleBarWidth, titleBarHeight - bottomCornerRadius);
+        ctx.quadraticCurveTo(titleBarX + titleBarWidth, titleBarHeight, titleBarX + titleBarWidth - bottomCornerRadius, titleBarHeight);
+        ctx.lineTo(titleBarX + bottomCornerRadius, titleBarHeight);
+        ctx.quadraticCurveTo(titleBarX, titleBarHeight, titleBarX, titleBarHeight - bottomCornerRadius);
+        ctx.lineTo(titleBarX, 0);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = textColor;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(title, width / 2, titleBarHeight / 2);
+
+        elements.overlayPreview.classList.remove('hidden');
+    }
+
+    // Private: Copy canvas to clipboard
+    async function copyCanvasToClipboard(canvas) {
+        try {
+            const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+            await navigator.clipboard.write([
+                new ClipboardItem({ 'image/png': blob })
+            ]);
+            return true;
+        } catch (err) {
+            console.error('Failed to copy:', err);
+            return false;
+        }
+    }
+
+    // Private: Update QR Code Preview
+    function updateQRCodePreview() {
+        const url = elements.qrUrlInput.value.trim();
+
+        if (!url) {
+            clearError(elements.qrUrlError);
+            elements.qrUrlInput.classList.remove('input-error');
             return;
         }
-        
-        // QRコードを右上背景領域内に描画
-        const qrX = bgX + padding;
-        const qrY = bgY + padding;
-        ctx.drawImage(tempCanvas, qrX, qrY);
-        
-        // タイトルが指定されている場合は描画
-        if (title) {
-            ctx.fillStyle = titleColor;
-            ctx.font = `bold ${titleFontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            const titleX = bgX + (bgWidth / 2);
-            const titleY = bgY + padding + qrSize + (titleHeight / 2);
-            ctx.fillText(title, titleX, titleY);
+
+        const validation = validateUrl(url);
+        if (!validation.valid) {
+            showError(elements.qrUrlError, validation.error);
+            elements.qrUrlInput.classList.add('input-error');
+            return;
         }
-        
-        // プレビューを表示
-        qrPreview.classList.remove('hidden');
-    });
-}
 
-// QRコードのダウンロード
-downloadQrBtn.addEventListener('click', () => {
-    const title = qrTitleInput.value.trim() || 'qrcode';
-    const filename = sanitizeFilename(title) + '_qrcode.png';
-    downloadCanvas(qrCanvas, filename);
-});
+        clearError(elements.qrUrlError);
+        elements.qrUrlInput.classList.remove('input-error');
 
-function generateOverlay(title, bgColor, textColor, fontSize, padding, width, height) {
-    const ctx = overlayCanvas.getContext('2d');
-    
-    // キャンバスの寸法を設定
-    overlayCanvas.width = width;
-    overlayCanvas.height = height;
-    
-    // キャンバスをクリア（透明背景）
-    ctx.clearRect(0, 0, width, height);
-    
-    // タイトルバーの寸法を計算
-    ctx.font = `bold ${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-    const textMetrics = ctx.measureText(title);
-    const textWidth = textMetrics.width;
-    const titleBarHeight = fontSize + (padding * 2);
-    const titleBarWidth = Math.min(textWidth + (padding * 4), width);
-    const titleBarX = (width - titleBarWidth) / 2;
-    
-    // 角丸でタイトル背景を描画
-    const bottomCornerRadius = 10;
-    
-    ctx.fillStyle = bgColor;
-    ctx.beginPath();
-    ctx.moveTo(titleBarX, 0);
-    ctx.lineTo(titleBarX + titleBarWidth, 0);
-    ctx.lineTo(titleBarX + titleBarWidth, titleBarHeight - bottomCornerRadius);
-    ctx.quadraticCurveTo(titleBarX + titleBarWidth, titleBarHeight, titleBarX + titleBarWidth - bottomCornerRadius, titleBarHeight);
-    ctx.lineTo(titleBarX + bottomCornerRadius, titleBarHeight);
-    ctx.quadraticCurveTo(titleBarX, titleBarHeight, titleBarX, titleBarHeight - bottomCornerRadius);
-    ctx.lineTo(titleBarX, 0);
-    ctx.closePath();
-    ctx.fill();
-    
-    // タイトルテキストを描画
-    ctx.fillStyle = textColor;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(title, width / 2, titleBarHeight / 2);
-    
-    // プレビューを表示
-    overlayPreview.classList.remove('hidden');
-}
+        const title = elements.qrTitleInput.value.trim();
+        const canvasSize = parseInt(elements.qrCanvasSizeSelect.value);
+        const sizePercent = parseInt(elements.qrSizePercentInput.value);
+        const color = elements.qrColorInput.value;
+        const bgColor = elements.qrBgColorInput.value;
+        const titleFontSize = parseInt(elements.qrTitleFontSizeSelect.value);
+        const titleColor = elements.qrTitleColorInput.value;
 
-// オーバーレイのダウンロード
-downloadOverlayBtn.addEventListener('click', () => {
-    const title = overlayTitleInput.value.trim() || 'overlay';
-    const filename = sanitizeFilename(title) + '_overlay.png';
-    downloadCanvas(overlayCanvas, filename);
-});
-
-// ユーティリティ関数
-function downloadCanvas(canvas, filename) {
-    const link = document.createElement('a');
-    link.download = filename;
-    link.href = canvas.toDataURL('image/png');
-    link.click();
-}
-
-function sanitizeFilename(name) {
-    return name
-        .replace(/[^\p{L}\p{N}]/gu, '_')
-        .replace(/_+/g, '_')
-        .replace(/^_|_$/g, '')
-        .substring(0, 50);
-}
-
-// リアルタイムプレビュー更新（オプション機能）
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func(...args), wait);
-    };
-}
-
-// Real-time preview update function for QR Code
-function updateQRCodePreview() {
-    const url = qrUrlInput.value.trim();
-    
-    // Only generate if URL is provided and valid
-    if (!url) {
-        return;
+        generateQRCode(url, title, canvasSize, canvasSize, sizePercent, color, bgColor, titleFontSize, titleColor);
+        saveSettings();
     }
-    
-    // Validate URL format
-    try {
-        new URL(url);
-    } catch {
-        return;
+
+    // Private: Update Overlay Preview
+    function updateOverlayPreview() {
+        const title = elements.overlayTitleInput.value.trim();
+        if (!title) return;
+
+        const bgColor = elements.overlayBgColorInput.value;
+        const textColor = elements.overlayTextColorInput.value;
+        const fontSize = parseInt(elements.overlayFontSizeSelect.value);
+        const padding = parseInt(elements.overlayPaddingSelect.value);
+        const [width, height] = elements.overlaySizeSelect.value.split('x').map(v => parseInt(v));
+
+        generateOverlay(title, bgColor, textColor, fontSize, padding, width, height);
+        saveSettings();
     }
-    
-    const title = qrTitleInput.value.trim();
-    const canvasSize = parseInt(qrCanvasSizeSelect.value);
-    const sizePercent = parseInt(qrSizePercentInput.value);
-    const color = qrColorInput.value;
-    const bgColor = qrBgColorInput.value;
-    const titleFontSize = parseInt(qrTitleFontSizeSelect.value);
-    const titleColor = qrTitleColorInput.value;
 
-    generateQRCode(url, title, canvasSize, canvasSize, sizePercent, color, bgColor, titleFontSize, titleColor);
-}
+    // Private: Tab switching with ARIA support
+    function setupTabs() {
+        elements.tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetTab = btn.dataset.tab;
 
-// Real-time preview update function for Overlay
-function updateOverlayPreview() {
-    const title = overlayTitleInput.value.trim();
-    
-    // Only generate if title is provided
-    if (!title) {
-        return;
+                elements.tabBtns.forEach(b => {
+                    b.classList.remove('active');
+                    b.setAttribute('aria-selected', 'false');
+                });
+                btn.classList.add('active');
+                btn.setAttribute('aria-selected', 'true');
+
+                elements.tabContents.forEach(content => {
+                    content.classList.remove('active');
+                    if (content.id === targetTab) {
+                        content.classList.add('active');
+                    }
+                });
+            });
+        });
     }
-    
-    const bgColor = overlayBgColorInput.value;
-    const textColor = overlayTextColorInput.value;
-    const fontSize = parseInt(overlayFontSizeSelect.value);
-    const padding = parseInt(overlayPaddingSelect.value);
-    
-    // Parse width and height from combined overlay size selection
-    const sizeValue = overlaySizeSelect.value;
-    const [width, height] = sizeValue.split('x').map(v => parseInt(v));
-    
-    generateOverlay(title, bgColor, textColor, fontSize, padding, width, height);
-}
 
-// Debounced versions for performance optimization
-const debouncedQRCodeUpdate = debounce(updateQRCodePreview, 300);
-const debouncedOverlayUpdate = debounce(updateOverlayPreview, 300);
+    // Private: Setup event listeners
+    function setupEventListeners() {
+        const debouncedQRUpdate = debounce(updateQRCodePreview, 300);
+        const debouncedOverlayUpdate = debounce(updateOverlayPreview, 300);
+        const debouncedColorQRUpdate = debounce(updateQRCodePreview, COLOR_DEBOUNCE_MS);
+        const debouncedColorOverlayUpdate = debounce(updateOverlayPreview, COLOR_DEBOUNCE_MS);
 
-// QR Code input event listeners for real-time preview
-const qrInputElements = [
-    { element: qrUrlInput, event: 'input' },
-    { element: qrTitleInput, event: 'input' },
-    { element: qrCanvasSizeSelect, event: 'change' },
-    { element: qrSizePercentInput, event: 'input' },
-    { element: qrColorInput, event: 'input' },
-    { element: qrBgColorInput, event: 'input' },
-    { element: qrTitleFontSizeSelect, event: 'change' },
-    { element: qrTitleColorInput, event: 'input' }
-];
+        // QR Code size percent display
+        elements.qrSizePercentInput.addEventListener('input', () => {
+            elements.qrSizePercentValue.textContent = `${elements.qrSizePercentInput.value}%`;
+            elements.qrSizePercentInput.setAttribute('aria-valuenow', elements.qrSizePercentInput.value);
+        });
 
-qrInputElements.forEach(({ element, event }) => {
-    element.addEventListener(event, debouncedQRCodeUpdate);
+        // QR Code inputs (text uses 'input', colors use 'change')
+        elements.qrUrlInput.addEventListener('input', debouncedQRUpdate);
+        elements.qrTitleInput.addEventListener('input', debouncedQRUpdate);
+        elements.qrCanvasSizeSelect.addEventListener('change', debouncedQRUpdate);
+        elements.qrSizePercentInput.addEventListener('input', debouncedQRUpdate);
+        elements.qrTitleFontSizeSelect.addEventListener('change', debouncedQRUpdate);
+
+        // Color inputs: use 'change' event for performance
+        elements.qrColorInput.addEventListener('change', debouncedColorQRUpdate);
+        elements.qrBgColorInput.addEventListener('change', debouncedColorQRUpdate);
+        elements.qrTitleColorInput.addEventListener('change', debouncedColorQRUpdate);
+
+        // Overlay inputs
+        elements.overlayTitleInput.addEventListener('input', debouncedOverlayUpdate);
+        elements.overlayFontSizeSelect.addEventListener('change', debouncedOverlayUpdate);
+        elements.overlayPaddingSelect.addEventListener('change', debouncedOverlayUpdate);
+        elements.overlaySizeSelect.addEventListener('change', debouncedOverlayUpdate);
+
+        // Overlay color inputs: use 'change' event
+        elements.overlayBgColorInput.addEventListener('change', debouncedColorOverlayUpdate);
+        elements.overlayTextColorInput.addEventListener('change', debouncedColorOverlayUpdate);
+
+        // Download buttons
+        elements.downloadQrBtn.addEventListener('click', () => {
+            const title = elements.qrTitleInput.value.trim() || 'qrcode';
+            const filename = sanitizeFilename(title) + '_qrcode.png';
+            downloadCanvas(elements.qrCanvas, filename);
+        });
+
+        elements.downloadOverlayBtn.addEventListener('click', () => {
+            const title = elements.overlayTitleInput.value.trim() || 'overlay';
+            const filename = sanitizeFilename(title) + '_overlay.png';
+            downloadCanvas(elements.overlayCanvas, filename);
+        });
+
+        // Copy to clipboard button
+        elements.copyQrBtn.addEventListener('click', async () => {
+            const originalText = elements.copyQrBtn.textContent;
+            const success = await copyCanvasToClipboard(elements.qrCanvas);
+            if (success) {
+                elements.copyQrBtn.textContent = 'Copied!';
+            } else {
+                elements.copyQrBtn.textContent = 'Copy failed';
+            }
+            setTimeout(() => {
+                elements.copyQrBtn.textContent = originalText;
+            }, 2000);
+        });
+    }
+
+    // Public: Initialize the application
+    function init() {
+        loadSettings();
+        setupTabs();
+        setupEventListeners();
+
+        // Generate initial previews if data exists
+        if (elements.qrUrlInput.value.trim()) {
+            updateQRCodePreview();
+        }
+        if (elements.overlayTitleInput.value.trim()) {
+            updateOverlayPreview();
+        }
+    }
+
+    // Return public API
+    return { init };
+})();
+
+// Initialize on DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+    App.init();
 });
-
-// Overlay input event listeners for real-time preview
-const overlayInputElements = [
-    { element: overlayTitleInput, event: 'input' },
-    { element: overlayBgColorInput, event: 'input' },
-    { element: overlayTextColorInput, event: 'input' },
-    { element: overlayFontSizeSelect, event: 'change' },
-    { element: overlayPaddingSelect, event: 'change' },
-    { element: overlaySizeSelect, event: 'change' }
-];
-
-overlayInputElements.forEach(({ element, event }) => {
-    element.addEventListener(event, debouncedOverlayUpdate);
-});
-
