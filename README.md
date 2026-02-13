@@ -2,6 +2,10 @@
 
 StreamYard用の配信素材を作成するための静的Webアプリケーションです。QRコードやタイトルオーバーレイを生成し、StreamYardのブランド機能にアップロードできます。
 
+## デモ
+
+🔗 **GitHub Pages**: https://raihalea.github.io/banner-for-jaws/
+
 ## 機能
 
 ### QRコードジェネレーター
