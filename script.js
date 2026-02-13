@@ -30,7 +30,6 @@ const App = (() => {
         qrPreview: document.getElementById('qr-preview'),
         qrCanvas: document.getElementById('qr-canvas'),
         downloadQrBtn: document.getElementById('download-qr'),
-        copyQrBtn: document.getElementById('copy-qr'),
         // Overlay elements
         overlayTitleInput: document.getElementById('overlay-title'),
         overlayBgColorInput: document.getElementById('overlay-bg-color'),
@@ -271,20 +270,6 @@ const App = (() => {
         elements.overlayPreview.classList.remove('hidden');
     }
 
-    // Private: Copy canvas to clipboard
-    async function copyCanvasToClipboard(canvas) {
-        try {
-            const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-            await navigator.clipboard.write([
-                new ClipboardItem({ 'image/png': blob })
-            ]);
-            return true;
-        } catch (err) {
-            console.error('Failed to copy:', err);
-            return false;
-        }
-    }
-
     // Private: Update QR Code Preview
     function updateQRCodePreview() {
         const url = elements.qrUrlInput.value.trim();
@@ -403,19 +388,6 @@ const App = (() => {
             downloadCanvas(elements.overlayCanvas, filename);
         });
 
-        // Copy to clipboard button
-        elements.copyQrBtn.addEventListener('click', async () => {
-            const originalText = elements.copyQrBtn.textContent;
-            const success = await copyCanvasToClipboard(elements.qrCanvas);
-            if (success) {
-                elements.copyQrBtn.textContent = 'Copied!';
-            } else {
-                elements.copyQrBtn.textContent = 'Copy failed';
-            }
-            setTimeout(() => {
-                elements.copyQrBtn.textContent = originalText;
-            }, 2000);
-        });
     }
 
     // Public: Initialize the application
