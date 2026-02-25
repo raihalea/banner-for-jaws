@@ -542,28 +542,6 @@ input[type="file"]::file-selector-button:hover {
     font-style: italic;
 }
 
-/* Advanced QR Preview Container */
-.qr-advanced-preview-container {
-    display: inline-block;
-    background-image: 
-        linear-gradient(45deg, #808080 25%, transparent 25%),
-        linear-gradient(-45deg, #808080 25%, transparent 25%),
-        linear-gradient(45deg, transparent 75%, #808080 75%),
-        linear-gradient(-45deg, transparent 75%, #808080 75%);
-    background-size: 20px 20px;
-    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
-    background-color: #666;
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.qr-advanced-preview-container canvas {
-    display: block;
-    max-width: 100%;
-    border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-}
-
 /* Gradient Colors Row */
 #gradient-colors.hidden {
     display: none;
