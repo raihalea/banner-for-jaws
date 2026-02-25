@@ -757,6 +757,13 @@ const App = (() => {
 })();
 
 // Initialize on DOM ready
-document.addEventListener('DOMContentLoaded', () => {
+// Note: ES modules with CDN imports may execute after DOMContentLoaded has already fired,
+// so we need to check the document readyState to ensure initialization happens.
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        App.init();
+    });
+} else {
+    // DOMContentLoaded has already fired, initialize immediately
     App.init();
-});
+}
