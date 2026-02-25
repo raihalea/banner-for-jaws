@@ -25,6 +25,15 @@
             <h2>📱 QR Code Generator</h2>
             <p class="description">Generate a QR code with a title for StreamYard Brand Logo (StreamYard compatible with transparent areas)</p>
             
+            <!-- Mode Toggle -->
+            <div class="mode-toggle-container">
+                <label class="mode-label">Generation Mode</label>
+                <div class="mode-toggle" role="group" aria-label="QR Code generation mode">
+                    <button type="button" class="mode-btn active" data-mode="simple" aria-pressed="true">Simple</button>
+                    <button type="button" class="mode-btn" data-mode="advanced" aria-pressed="false">Advanced</button>
+                </div>
+            </div>
+
             <div class="form-group">
                 <label for="qr-url">URL</label>
                 <input type="url" id="qr-url" placeholder="https://example.com" required aria-describedby="qr-url-error">
@@ -91,12 +100,89 @@
                     <input type="color" id="qr-title-color" value="#000000" aria-label="QR Code title text color">
                 </div>
             </div>
+
+            <!-- Advanced Mode Controls -->
+            <div id="advanced-controls" class="advanced-controls hidden">
+                <h3 class="advanced-section-title">✨ Advanced Styling Options</h3>
+                
+                <div class="form-group">
+                    <label for="qr-logo-upload">Logo Image (optional)</label>
+                    <div class="file-upload-container">
+                        <input type="file" id="qr-logo-upload" accept="image/*" aria-label="Upload logo image">
+                        <button type="button" id="qr-logo-clear" class="btn-small" style="display: none;">Clear Logo</button>
+                    </div>
+                    <span id="qr-logo-preview-name" class="file-name"></span>
+                </div>
+
+                <div class="form-group" id="logo-size-group" style="display: none;">
+                    <label for="qr-logo-size">Logo Size (%)</label>
+                    <div class="range-container">
+                        <input type="range" id="qr-logo-size" min="10" max="50" value="30" step="5" aria-valuemin="10" aria-valuemax="50" aria-valuenow="30">
+                        <span id="qr-logo-size-value" class="range-value">30%</span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="qr-dot-style">Dot Style</label>
+                        <select id="qr-dot-style">
+                            <option value="square" selected>Square</option>
+                            <option value="dots">Dots (Circle)</option>
+                            <option value="rounded">Rounded</option>
+                            <option value="extra-rounded">Extra Rounded</option>
+                            <option value="classy">Classy</option>
+                            <option value="classy-rounded">Classy Rounded</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="qr-corner-square-style">Corner Square Style</label>
+                        <select id="qr-corner-square-style">
+                            <option value="square" selected>Square</option>
+                            <option value="dot">Dot</option>
+                            <option value="extra-rounded">Extra Rounded</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="qr-corner-dot-style">Corner Dot Style</label>
+                        <select id="qr-corner-dot-style">
+                            <option value="square" selected>Square</option>
+                            <option value="dot">Dot</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="qr-gradient-type">Color Type</label>
+                        <select id="qr-gradient-type">
+                            <option value="none" selected>Solid Color</option>
+                            <option value="linear">Linear Gradient</option>
+                            <option value="radial">Radial Gradient</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="gradient-colors" class="form-row hidden">
+                    <div class="form-group">
+                        <label for="qr-gradient-color1">Gradient Start Color</label>
+                        <input type="color" id="qr-gradient-color1" value="#6366f1" aria-label="Gradient start color">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="qr-gradient-color2">Gradient End Color</label>
+                        <input type="color" id="qr-gradient-color2" value="#a855f7" aria-label="Gradient end color">
+                    </div>
+                </div>
+            </div>
             
             <div id="qr-preview" class="preview-container hidden">
                 <h3>Preview</h3>
                 <div class="canvas-wrapper">
                     <canvas id="qr-canvas" aria-label="QR Code preview"></canvas>
                 </div>
+                <div id="qr-advanced-preview" class="qr-advanced-preview-container" style="display: none;"></div>
                 <span id="qr-generation-error" class="error-message" role="alert" aria-live="polite"></span>
                 <p class="preview-note">Note: Checkered pattern indicates transparency (left and bottom areas are transparent for StreamYard overlay)</p>
                 <div class="button-group">
