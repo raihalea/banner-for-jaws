@@ -73,6 +73,7 @@ const App = (() => {
         modeBtns: document.querySelectorAll('.mode-btn'),
         advancedControls: document.getElementById('advanced-controls'),
         // Advanced mode elements
+        qrLogoUrl: document.getElementById('qr-logo-url'),
         qrLogoUpload: document.getElementById('qr-logo-upload'),
         qrLogoClear: document.getElementById('qr-logo-clear'),
         qrLogoPreviewName: document.getElementById('qr-logo-preview-name'),
@@ -120,6 +121,19 @@ const App = (() => {
         link.download = filename;
         link.href = canvas.toDataURL('image/png');
         link.click();
+    }
+
+    // Private: Get effective logo (uploaded file takes precedence over URL)
+    function getEffectiveLogo() {
+        if (logoImageData) return logoImageData;
+        const logoUrl = elements.qrLogoUrl.value.trim();
+        return logoUrl || null;
+    }
+
+    // Private: Update logo size group visibility
+    function updateLogoSizeVisibility() {
+        const hasLogo = getEffectiveLogo();
+        elements.logoSizeGroup.style.display = hasLogo ? 'block' : 'none';
     }
 
     // Private: URL validation with security checks
@@ -176,6 +190,7 @@ const App = (() => {
                 titleColor: elements.qrTitleColorInput.value,
                 mode: currentQRMode,
                 // Advanced mode settings
+                logoUrl: elements.qrLogoUrl.value,
                 logoSize: elements.qrLogoSize.value,
                 dotStyle: elements.qrDotStyle.value,
                 cornerSquareStyle: elements.qrCornerSquareStyle.value,
@@ -225,6 +240,7 @@ const App = (() => {
                     currentQRMode = settings.qr.mode;
                 }
                 // Load advanced settings
+                if (settings.qr.logoUrl !== undefined) elements.qrLogoUrl.value = settings.qr.logoUrl;
                 if (settings.qr.logoSize) {
                     elements.qrLogoSize.value = settings.qr.logoSize;
                     elements.qrLogoSizeValue.textContent = `${settings.qr.logoSize}%`;
@@ -354,6 +370,9 @@ const App = (() => {
             cornersDotOptions.color = color;
         }
 
+        // Determine effective logo (uploaded file takes precedence over URL)
+        const effectiveLogo = getEffectiveLogo();
+
         // QRCodeStyling options
         const qrOptions = {
             type: 'canvas',
@@ -362,7 +381,7 @@ const App = (() => {
             data: url,
             margin: 0,
             qrOptions: {
-                errorCorrectionLevel: logoImageData ? 'H' : 'M'
+                errorCorrectionLevel: effectiveLogo ? 'H' : 'M'
             },
             dotsOptions,
             cornersSquareOptions,
@@ -373,8 +392,8 @@ const App = (() => {
         };
 
         // Add logo if present
-        if (logoImageData) {
-            qrOptions.image = logoImageData;
+        if (effectiveLogo) {
+            qrOptions.image = effectiveLogo;
             qrOptions.imageOptions = {
                 crossOrigin: 'anonymous',
                 margin: 2,
@@ -596,8 +615,19 @@ const App = (() => {
         });
     }
 
-    // Private: Setup logo upload handlers
-    function setupLogoUpload() {
+    // Private: Setup logo input handlers (URL and file upload)
+    function setupLogoInputs() {
+        // Logo URL input
+        const debouncedLogoUrlUpdate = debounce(() => {
+            updateLogoSizeVisibility();
+            if (elements.qrUrlInput.value.trim()) {
+                updateQRCodePreview();
+            }
+            saveSettings();
+        }, 300);
+        elements.qrLogoUrl.addEventListener('input', debouncedLogoUrlUpdate);
+
+        // File upload
         elements.qrLogoUpload.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -614,7 +644,7 @@ const App = (() => {
                 logoImageData = event.target.result;
                 elements.qrLogoPreviewName.textContent = file.name;
                 elements.qrLogoClear.style.display = 'inline-block';
-                elements.logoSizeGroup.style.display = 'block';
+                updateLogoSizeVisibility();
 
                 // Re-generate QR code
                 if (elements.qrUrlInput.value.trim()) {
@@ -627,12 +657,13 @@ const App = (() => {
             reader.readAsDataURL(file);
         });
 
+        // Clear uploaded file (URL logo will be used if present)
         elements.qrLogoClear.addEventListener('click', () => {
             logoImageData = null;
             elements.qrLogoUpload.value = '';
             elements.qrLogoPreviewName.textContent = '';
             elements.qrLogoClear.style.display = 'none';
-            elements.logoSizeGroup.style.display = 'none';
+            updateLogoSizeVisibility();
 
             // Re-generate QR code
             if (elements.qrUrlInput.value.trim()) {
@@ -732,6 +763,9 @@ const App = (() => {
                 elements.gradientColors.classList.remove('hidden');
             }
         }
+
+        // Show logo size group if any logo source is present
+        updateLogoSizeVisibility();
     }
 
     // Public: Initialize the application
@@ -739,7 +773,7 @@ const App = (() => {
         loadSettings();
         setupTabs();
         setupModeToggle();
-        setupLogoUpload();
+        setupLogoInputs();
         setupEventListeners();
         applyLoadedMode();
 
