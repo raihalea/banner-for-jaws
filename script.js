@@ -1,5 +1,4 @@
 import QRCode from 'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/+esm'
-import QRCodeStyling from 'https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0-rc.1/+esm'
 
 // Application Module Pattern
 const App = (() => {
@@ -20,6 +19,36 @@ const App = (() => {
 
     // Private: QRCodeStyling instance
     let qrCodeStylingInstance = null;
+
+    // Private: Lazy-loaded QRCodeStyling class (loaded on demand for advanced mode)
+    let QRCodeStylingClass = null;
+
+    async function loadQRCodeStyling() {
+        if (QRCodeStylingClass) return QRCodeStylingClass;
+        const module = await import('https://cdn.jsdelivr.net/npm/qr-code-styling@1.9.2/+esm');
+        QRCodeStylingClass = module.default;
+        if (!QRCodeStylingClass) {
+            throw new Error('QRCodeStyling module loaded but default export is not available');
+        }
+        return QRCodeStylingClass;
+    }
+
+    // Private: Load an image from a Blob
+    function loadImageFromBlob(blob) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            const url = URL.createObjectURL(blob);
+            img.onload = () => {
+                URL.revokeObjectURL(url);
+                resolve(img);
+            };
+            img.onerror = () => {
+                URL.revokeObjectURL(url);
+                reject(new Error('Failed to load QR code image'));
+            };
+            img.src = url;
+        });
+    }
 
     // Private: DOM Elements
     const elements = {
@@ -57,7 +86,6 @@ const App = (() => {
         gradientColors: document.getElementById('gradient-colors'),
         qrGradientColor1: document.getElementById('qr-gradient-color1'),
         qrGradientColor2: document.getElementById('qr-gradient-color2'),
-        qrAdvancedPreview: document.getElementById('qr-advanced-preview'),
         // Overlay elements
         overlayTitleInput: document.getElementById('overlay-title'),
         overlayBgColorInput: document.getElementById('overlay-bg-color'),
@@ -301,70 +329,44 @@ const App = (() => {
         const gradientColor2 = elements.qrGradientColor2.value;
         const logoSize = parseInt(elements.qrLogoSize.value);
 
-        // Build dots options
-        let dotsOptions = {
-            type: dotStyle
-        };
+        // Build gradient config (reused for dots, corners)
+        const gradientConfig = gradientType !== 'none' ? {
+            type: gradientType,
+            rotation: 45,
+            colorStops: [
+                { offset: 0, color: gradientColor1 },
+                { offset: 1, color: gradientColor2 }
+            ]
+        } : null;
 
-        if (gradientType !== 'none') {
-            dotsOptions.gradient = {
-                type: gradientType,
-                rotation: 45,
-                colorStops: [
-                    { offset: 0, color: gradientColor1 },
-                    { offset: 1, color: gradientColor2 }
-                ]
-            };
+        // Build styling options
+        const dotsOptions = { type: dotStyle };
+        const cornersSquareOptions = { type: cornerSquareStyle };
+        const cornersDotOptions = { type: cornerDotStyle };
+
+        if (gradientConfig) {
+            dotsOptions.gradient = gradientConfig;
+            cornersSquareOptions.gradient = gradientConfig;
+            cornersDotOptions.gradient = gradientConfig;
         } else {
             dotsOptions.color = color;
-        }
-
-        // Build corner squares options
-        let cornersSquareOptions = {
-            type: cornerSquareStyle
-        };
-        if (gradientType !== 'none') {
-            cornersSquareOptions.gradient = {
-                type: gradientType,
-                rotation: 45,
-                colorStops: [
-                    { offset: 0, color: gradientColor1 },
-                    { offset: 1, color: gradientColor2 }
-                ]
-            };
-        } else {
             cornersSquareOptions.color = color;
-        }
-
-        // Build corner dot options
-        let cornersDotOptions = {
-            type: cornerDotStyle
-        };
-        if (gradientType !== 'none') {
-            cornersDotOptions.gradient = {
-                type: gradientType,
-                rotation: 45,
-                colorStops: [
-                    { offset: 0, color: gradientColor1 },
-                    { offset: 1, color: gradientColor2 }
-                ]
-            };
-        } else {
             cornersDotOptions.color = color;
         }
 
         // QRCodeStyling options
         const qrOptions = {
+            type: 'canvas',
             width: qrSize,
             height: qrSize,
             data: url,
             margin: 0,
             qrOptions: {
-                errorCorrectionLevel: logoImageData ? 'H' : 'M' // Higher error correction when logo is present
+                errorCorrectionLevel: logoImageData ? 'H' : 'M'
             },
-            dotsOptions: dotsOptions,
-            cornersSquareOptions: cornersSquareOptions,
-            cornersDotOptions: cornersDotOptions,
+            dotsOptions,
+            cornersSquareOptions,
+            cornersDotOptions,
             backgroundOptions: {
                 color: bgColor
             }
@@ -380,23 +382,21 @@ const App = (() => {
             };
         }
 
-        // Clear previous instance
-        elements.qrAdvancedPreview.innerHTML = '';
-
-        // Create new QRCodeStyling instance
-        qrCodeStylingInstance = new QRCodeStyling(qrOptions);
-
-        // Append to preview container
-        await qrCodeStylingInstance.append(elements.qrAdvancedPreview);
-
-        // Now draw the complete composition on the main canvas
         try {
-            const qrCanvas = elements.qrAdvancedPreview.querySelector('canvas');
-            if (!qrCanvas) {
-                showError(elements.qrGenerationError, 'Failed to generate QR code. Please try again.');
+            // Load QRCodeStyling library on demand
+            const QRCodeStyling = await loadQRCodeStyling();
+
+            // Create QRCodeStyling instance and get raw image data
+            qrCodeStylingInstance = new QRCodeStyling(qrOptions);
+            const blob = await qrCodeStylingInstance.getRawData('png');
+            if (!blob) {
+                showError(elements.qrGenerationError, 'Failed to generate QR code data. Please try again.');
                 return;
             }
 
+            const qrImage = await loadImageFromBlob(blob);
+
+            // Draw the complete composition on the main canvas
             const ctx = elements.qrCanvas.getContext('2d');
             elements.qrCanvas.width = canvasWidth;
             elements.qrCanvas.height = canvasHeight;
@@ -427,7 +427,7 @@ const App = (() => {
             // Draw QR code
             const qrX = bgX + padding;
             const qrY = bgY + padding;
-            ctx.drawImage(qrCanvas, qrX, qrY, qrSize, qrSize);
+            ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize);
 
             // Draw title
             if (title) {
@@ -444,7 +444,7 @@ const App = (() => {
             elements.qrPreview.classList.remove('hidden');
         } catch (error) {
             console.error('Error generating advanced QR code:', error);
-            showError(elements.qrGenerationError, 'Failed to generate QR code. Please try again.');
+            showError(elements.qrGenerationError, 'Failed to generate advanced QR code. Please check the console for details.');
         }
     }
 
