@@ -1,4 +1,5 @@
 import QRCode from 'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/+esm'
+import QRCodeStyling from 'https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0-rc.1/+esm'
 
 // Application Module Pattern
 const App = (() => {
@@ -10,6 +11,15 @@ const App = (() => {
 
     // Private: Debounce timeout for color inputs (ms)
     const COLOR_DEBOUNCE_MS = 500;
+
+    // Private: Current QR mode ('simple' or 'advanced')
+    let currentQRMode = 'simple';
+
+    // Private: Logo image data URL
+    let logoImageData = null;
+
+    // Private: QRCodeStyling instance
+    let qrCodeStylingInstance = null;
 
     // Private: DOM Elements
     const elements = {
@@ -30,6 +40,24 @@ const App = (() => {
         qrPreview: document.getElementById('qr-preview'),
         qrCanvas: document.getElementById('qr-canvas'),
         downloadQrBtn: document.getElementById('download-qr'),
+        // Mode toggle elements
+        modeBtns: document.querySelectorAll('.mode-btn'),
+        advancedControls: document.getElementById('advanced-controls'),
+        // Advanced mode elements
+        qrLogoUpload: document.getElementById('qr-logo-upload'),
+        qrLogoClear: document.getElementById('qr-logo-clear'),
+        qrLogoPreviewName: document.getElementById('qr-logo-preview-name'),
+        logoSizeGroup: document.getElementById('logo-size-group'),
+        qrLogoSize: document.getElementById('qr-logo-size'),
+        qrLogoSizeValue: document.getElementById('qr-logo-size-value'),
+        qrDotStyle: document.getElementById('qr-dot-style'),
+        qrCornerSquareStyle: document.getElementById('qr-corner-square-style'),
+        qrCornerDotStyle: document.getElementById('qr-corner-dot-style'),
+        qrGradientType: document.getElementById('qr-gradient-type'),
+        gradientColors: document.getElementById('gradient-colors'),
+        qrGradientColor1: document.getElementById('qr-gradient-color1'),
+        qrGradientColor2: document.getElementById('qr-gradient-color2'),
+        qrAdvancedPreview: document.getElementById('qr-advanced-preview'),
         // Overlay elements
         overlayTitleInput: document.getElementById('overlay-title'),
         overlayBgColorInput: document.getElementById('overlay-bg-color'),
@@ -117,7 +145,16 @@ const App = (() => {
                 color: elements.qrColorInput.value,
                 bgColor: elements.qrBgColorInput.value,
                 titleFontSize: elements.qrTitleFontSizeSelect.value,
-                titleColor: elements.qrTitleColorInput.value
+                titleColor: elements.qrTitleColorInput.value,
+                mode: currentQRMode,
+                // Advanced mode settings
+                logoSize: elements.qrLogoSize.value,
+                dotStyle: elements.qrDotStyle.value,
+                cornerSquareStyle: elements.qrCornerSquareStyle.value,
+                cornerDotStyle: elements.qrCornerDotStyle.value,
+                gradientType: elements.qrGradientType.value,
+                gradientColor1: elements.qrGradientColor1.value,
+                gradientColor2: elements.qrGradientColor2.value
             },
             overlay: {
                 title: elements.overlayTitleInput.value,
@@ -155,6 +192,21 @@ const App = (() => {
                 if (settings.qr.bgColor) elements.qrBgColorInput.value = settings.qr.bgColor;
                 if (settings.qr.titleFontSize) elements.qrTitleFontSizeSelect.value = settings.qr.titleFontSize;
                 if (settings.qr.titleColor) elements.qrTitleColorInput.value = settings.qr.titleColor;
+                // Load mode
+                if (settings.qr.mode) {
+                    currentQRMode = settings.qr.mode;
+                }
+                // Load advanced settings
+                if (settings.qr.logoSize) {
+                    elements.qrLogoSize.value = settings.qr.logoSize;
+                    elements.qrLogoSizeValue.textContent = `${settings.qr.logoSize}%`;
+                }
+                if (settings.qr.dotStyle) elements.qrDotStyle.value = settings.qr.dotStyle;
+                if (settings.qr.cornerSquareStyle) elements.qrCornerSquareStyle.value = settings.qr.cornerSquareStyle;
+                if (settings.qr.cornerDotStyle) elements.qrCornerDotStyle.value = settings.qr.cornerDotStyle;
+                if (settings.qr.gradientType) elements.qrGradientType.value = settings.qr.gradientType;
+                if (settings.qr.gradientColor1) elements.qrGradientColor1.value = settings.qr.gradientColor1;
+                if (settings.qr.gradientColor2) elements.qrGradientColor2.value = settings.qr.gradientColor2;
             }
 
             // Overlay settings
@@ -171,7 +223,7 @@ const App = (() => {
         }
     }
 
-    // Private: QR Code generation
+    // Private: QR Code generation (Simple mode)
     function generateQRCode(url, title, canvasWidth, canvasHeight, sizePercent, color, bgColor, titleFontSize, titleColor) {
         const ctx = elements.qrCanvas.getContext('2d');
 
@@ -232,6 +284,168 @@ const App = (() => {
 
             elements.qrPreview.classList.remove('hidden');
         });
+    }
+
+    // Private: Advanced QR Code generation using qr-code-styling
+    async function generateAdvancedQRCode(url, title, canvasWidth, canvasHeight, sizePercent, color, bgColor, titleFontSize, titleColor) {
+        const qrSize = Math.floor(canvasHeight * (sizePercent / 100));
+        const titleHeight = title ? (titleFontSize + 12) : 0;
+        const padding = 8;
+
+        // Get advanced styling options
+        const dotStyle = elements.qrDotStyle.value;
+        const cornerSquareStyle = elements.qrCornerSquareStyle.value;
+        const cornerDotStyle = elements.qrCornerDotStyle.value;
+        const gradientType = elements.qrGradientType.value;
+        const gradientColor1 = elements.qrGradientColor1.value;
+        const gradientColor2 = elements.qrGradientColor2.value;
+        const logoSize = parseInt(elements.qrLogoSize.value);
+
+        // Build dots options
+        let dotsOptions = {
+            type: dotStyle
+        };
+
+        if (gradientType !== 'none') {
+            dotsOptions.gradient = {
+                type: gradientType,
+                rotation: 45,
+                colorStops: [
+                    { offset: 0, color: gradientColor1 },
+                    { offset: 1, color: gradientColor2 }
+                ]
+            };
+        } else {
+            dotsOptions.color = color;
+        }
+
+        // Build corner squares options
+        let cornersSquareOptions = {
+            type: cornerSquareStyle
+        };
+        if (gradientType !== 'none') {
+            cornersSquareOptions.gradient = {
+                type: gradientType,
+                rotation: 45,
+                colorStops: [
+                    { offset: 0, color: gradientColor1 },
+                    { offset: 1, color: gradientColor2 }
+                ]
+            };
+        } else {
+            cornersSquareOptions.color = color;
+        }
+
+        // Build corner dot options
+        let cornersDotOptions = {
+            type: cornerDotStyle
+        };
+        if (gradientType !== 'none') {
+            cornersDotOptions.gradient = {
+                type: gradientType,
+                rotation: 45,
+                colorStops: [
+                    { offset: 0, color: gradientColor1 },
+                    { offset: 1, color: gradientColor2 }
+                ]
+            };
+        } else {
+            cornersDotOptions.color = color;
+        }
+
+        // QRCodeStyling options
+        const qrOptions = {
+            width: qrSize,
+            height: qrSize,
+            data: url,
+            margin: 0,
+            qrOptions: {
+                errorCorrectionLevel: logoImageData ? 'H' : 'M' // Higher error correction when logo is present
+            },
+            dotsOptions: dotsOptions,
+            cornersSquareOptions: cornersSquareOptions,
+            cornersDotOptions: cornersDotOptions,
+            backgroundOptions: {
+                color: bgColor
+            }
+        };
+
+        // Add logo if present
+        if (logoImageData) {
+            qrOptions.image = logoImageData;
+            qrOptions.imageOptions = {
+                crossOrigin: 'anonymous',
+                margin: 2,
+                imageSize: logoSize / 100
+            };
+        }
+
+        // Clear previous instance
+        elements.qrAdvancedPreview.innerHTML = '';
+
+        // Create new QRCodeStyling instance
+        qrCodeStylingInstance = new QRCodeStyling(qrOptions);
+
+        // Append to preview container
+        await qrCodeStylingInstance.append(elements.qrAdvancedPreview);
+
+        // Now draw the complete composition on the main canvas
+        try {
+            const qrCanvas = elements.qrAdvancedPreview.querySelector('canvas');
+            if (!qrCanvas) {
+                showError(elements.qrGenerationError, 'Failed to generate QR code. Please try again.');
+                return;
+            }
+
+            const ctx = elements.qrCanvas.getContext('2d');
+            elements.qrCanvas.width = canvasWidth;
+            elements.qrCanvas.height = canvasHeight;
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+            // Calculate background dimensions
+            const bgWidth = qrSize + (padding * 2);
+            const bgHeight = qrSize + (padding * 2) + titleHeight;
+            const bgX = canvasWidth - bgWidth - padding;
+            const bgY = padding;
+
+            // Draw rounded rectangle background
+            const cornerRadius = 8;
+            ctx.fillStyle = bgColor;
+            ctx.beginPath();
+            ctx.moveTo(bgX + cornerRadius, bgY);
+            ctx.lineTo(bgX + bgWidth - cornerRadius, bgY);
+            ctx.quadraticCurveTo(bgX + bgWidth, bgY, bgX + bgWidth, bgY + cornerRadius);
+            ctx.lineTo(bgX + bgWidth, bgY + bgHeight - cornerRadius);
+            ctx.quadraticCurveTo(bgX + bgWidth, bgY + bgHeight, bgX + bgWidth - cornerRadius, bgY + bgHeight);
+            ctx.lineTo(bgX + cornerRadius, bgY + bgHeight);
+            ctx.quadraticCurveTo(bgX, bgY + bgHeight, bgX, bgY + bgHeight - cornerRadius);
+            ctx.lineTo(bgX, bgY + cornerRadius);
+            ctx.quadraticCurveTo(bgX, bgY, bgX + cornerRadius, bgY);
+            ctx.closePath();
+            ctx.fill();
+
+            // Draw QR code
+            const qrX = bgX + padding;
+            const qrY = bgY + padding;
+            ctx.drawImage(qrCanvas, qrX, qrY, qrSize, qrSize);
+
+            // Draw title
+            if (title) {
+                ctx.fillStyle = titleColor;
+                ctx.font = `bold ${titleFontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                const titleX = bgX + (bgWidth / 2);
+                const titleY = bgY + padding + qrSize + (titleHeight / 2);
+                ctx.fillText(title, titleX, titleY);
+            }
+
+            clearError(elements.qrGenerationError);
+            elements.qrPreview.classList.remove('hidden');
+        } catch (error) {
+            console.error('Error generating advanced QR code:', error);
+            showError(elements.qrGenerationError, 'Failed to generate QR code. Please try again.');
+        }
     }
 
     // Private: Overlay generation
@@ -298,7 +512,11 @@ const App = (() => {
         const titleFontSize = parseInt(elements.qrTitleFontSizeSelect.value);
         const titleColor = elements.qrTitleColorInput.value;
 
-        generateQRCode(url, title, canvasSize, canvasSize, sizePercent, color, bgColor, titleFontSize, titleColor);
+        if (currentQRMode === 'advanced') {
+            generateAdvancedQRCode(url, title, canvasSize, canvasSize, sizePercent, color, bgColor, titleFontSize, titleColor);
+        } else {
+            generateQRCode(url, title, canvasSize, canvasSize, sizePercent, color, bgColor, titleFontSize, titleColor);
+        }
         saveSettings();
     }
 
@@ -340,6 +558,89 @@ const App = (() => {
         });
     }
 
+    // Private: Setup mode toggle
+    function setupModeToggle() {
+        elements.modeBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const mode = btn.dataset.mode;
+                if (mode === currentQRMode) return;
+
+                currentQRMode = mode;
+
+                // Update button states
+                elements.modeBtns.forEach(b => {
+                    b.classList.remove('active');
+                    b.setAttribute('aria-pressed', 'false');
+                });
+                btn.classList.add('active');
+                btn.setAttribute('aria-pressed', 'true');
+
+                // Show/hide advanced controls
+                if (mode === 'advanced') {
+                    elements.advancedControls.classList.remove('hidden');
+                    // Show gradient colors if gradient is selected
+                    if (elements.qrGradientType.value !== 'none') {
+                        elements.gradientColors.classList.remove('hidden');
+                    }
+                } else {
+                    elements.advancedControls.classList.add('hidden');
+                }
+
+                // Re-generate preview if URL exists
+                if (elements.qrUrlInput.value.trim()) {
+                    updateQRCodePreview();
+                }
+
+                saveSettings();
+            });
+        });
+    }
+
+    // Private: Setup logo upload handlers
+    function setupLogoUpload() {
+        elements.qrLogoUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                showError(elements.qrGenerationError, 'Please select a valid image file.');
+                return;
+            }
+
+            // Read file as data URL
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                logoImageData = event.target.result;
+                elements.qrLogoPreviewName.textContent = file.name;
+                elements.qrLogoClear.style.display = 'inline-block';
+                elements.logoSizeGroup.style.display = 'block';
+
+                // Re-generate QR code
+                if (elements.qrUrlInput.value.trim()) {
+                    updateQRCodePreview();
+                }
+            };
+            reader.onerror = () => {
+                showError(elements.qrGenerationError, 'Failed to read the image file.');
+            };
+            reader.readAsDataURL(file);
+        });
+
+        elements.qrLogoClear.addEventListener('click', () => {
+            logoImageData = null;
+            elements.qrLogoUpload.value = '';
+            elements.qrLogoPreviewName.textContent = '';
+            elements.qrLogoClear.style.display = 'none';
+            elements.logoSizeGroup.style.display = 'none';
+
+            // Re-generate QR code
+            if (elements.qrUrlInput.value.trim()) {
+                updateQRCodePreview();
+            }
+        });
+    }
+
     // Private: Setup event listeners
     function setupEventListeners() {
         const debouncedQRUpdate = debounce(updateQRCodePreview, 300);
@@ -364,6 +665,27 @@ const App = (() => {
         elements.qrColorInput.addEventListener('change', debouncedColorQRUpdate);
         elements.qrBgColorInput.addEventListener('change', debouncedColorQRUpdate);
         elements.qrTitleColorInput.addEventListener('change', debouncedColorQRUpdate);
+
+        // Advanced mode controls
+        elements.qrLogoSize.addEventListener('input', () => {
+            elements.qrLogoSizeValue.textContent = `${elements.qrLogoSize.value}%`;
+            elements.qrLogoSize.setAttribute('aria-valuenow', elements.qrLogoSize.value);
+        });
+        elements.qrLogoSize.addEventListener('input', debouncedQRUpdate);
+        elements.qrDotStyle.addEventListener('change', debouncedQRUpdate);
+        elements.qrCornerSquareStyle.addEventListener('change', debouncedQRUpdate);
+        elements.qrCornerDotStyle.addEventListener('change', debouncedQRUpdate);
+        elements.qrGradientType.addEventListener('change', () => {
+            // Show/hide gradient color inputs
+            if (elements.qrGradientType.value !== 'none') {
+                elements.gradientColors.classList.remove('hidden');
+            } else {
+                elements.gradientColors.classList.add('hidden');
+            }
+            debouncedQRUpdate();
+        });
+        elements.qrGradientColor1.addEventListener('change', debouncedColorQRUpdate);
+        elements.qrGradientColor2.addEventListener('change', debouncedColorQRUpdate);
 
         // Overlay inputs
         elements.overlayTitleInput.addEventListener('input', debouncedOverlayUpdate);
@@ -390,11 +712,36 @@ const App = (() => {
 
     }
 
+    // Private: Apply loaded mode to UI
+    function applyLoadedMode() {
+        // Update mode button states
+        elements.modeBtns.forEach(btn => {
+            if (btn.dataset.mode === currentQRMode) {
+                btn.classList.add('active');
+                btn.setAttribute('aria-pressed', 'true');
+            } else {
+                btn.classList.remove('active');
+                btn.setAttribute('aria-pressed', 'false');
+            }
+        });
+
+        // Show/hide advanced controls
+        if (currentQRMode === 'advanced') {
+            elements.advancedControls.classList.remove('hidden');
+            if (elements.qrGradientType.value !== 'none') {
+                elements.gradientColors.classList.remove('hidden');
+            }
+        }
+    }
+
     // Public: Initialize the application
     function init() {
         loadSettings();
         setupTabs();
+        setupModeToggle();
+        setupLogoUpload();
         setupEventListeners();
+        applyLoadedMode();
 
         // Generate initial previews if data exists
         if (elements.qrUrlInput.value.trim()) {
