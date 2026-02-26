@@ -17,6 +17,9 @@ const App = (() => {
     // Private: Logo image data URL
     let logoImageData = null;
 
+    // Private: Cached preset logo data URLs
+    const presetLogoCache = {};
+
     // Private: QRCodeStyling instance
     let qrCodeStylingInstance = null;
 
@@ -73,6 +76,9 @@ const App = (() => {
         modeBtns: document.querySelectorAll('.mode-btn'),
         advancedControls: document.getElementById('advanced-controls'),
         // Advanced mode elements
+        qrLogoSource: document.getElementById('qr-logo-source'),
+        logoUrlGroup: document.getElementById('logo-url-group'),
+        logoUploadGroup: document.getElementById('logo-upload-group'),
         qrLogoUrl: document.getElementById('qr-logo-url'),
         qrLogoUpload: document.getElementById('qr-logo-upload'),
         qrLogoClear: document.getElementById('qr-logo-clear'),
@@ -123,11 +129,61 @@ const App = (() => {
         link.click();
     }
 
-    // Private: Get effective logo (uploaded file takes precedence over URL)
+    // Private: Generate a text-based preset logo as a data URL
+    function generatePresetLogo(text) {
+        if (presetLogoCache[text]) return presetLogoCache[text];
+
+        const size = 200;
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+
+        // White circular background
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Text
+        ctx.fillStyle = '#000000';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        const fontSize = text.length <= 2 ? Math.floor(size * 0.45) : Math.floor(size * 0.3);
+        ctx.font = `bold ${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+        ctx.fillText(text, size / 2, size / 2);
+
+        const dataUrl = canvas.toDataURL('image/png');
+        presetLogoCache[text] = dataUrl;
+        return dataUrl;
+    }
+
+    // Private: Update visibility of logo input groups based on logo source selection
+    function updateLogoSourceVisibility() {
+        const source = elements.qrLogoSource.value;
+        elements.logoUrlGroup.style.display = source === 'url' ? 'block' : 'none';
+        elements.logoUploadGroup.style.display = source === 'upload' ? 'block' : 'none';
+    }
+
+    // Private: Get effective logo based on logo source selection
     function getEffectiveLogo() {
-        if (logoImageData) return logoImageData;
-        const logoUrl = elements.qrLogoUrl.value.trim();
-        return logoUrl || null;
+        const source = elements.qrLogoSource.value;
+        switch (source) {
+            case 'qa':
+                return generatePresetLogo('QA');
+            case 'survey':
+                return generatePresetLogo('Survey');
+            case 'upload':
+                if (logoImageData) return logoImageData;
+                return null;
+            case 'url': {
+                const logoUrl = elements.qrLogoUrl.value.trim();
+                return logoUrl || null;
+            }
+            case 'none':
+            default:
+                return null;
+        }
     }
 
     // Private: Update logo size group visibility
@@ -190,6 +246,7 @@ const App = (() => {
                 titleColor: elements.qrTitleColorInput.value,
                 mode: currentQRMode,
                 // Advanced mode settings
+                logoSource: elements.qrLogoSource.value,
                 logoUrl: elements.qrLogoUrl.value,
                 logoSize: elements.qrLogoSize.value,
                 dotStyle: elements.qrDotStyle.value,
@@ -240,6 +297,7 @@ const App = (() => {
                     currentQRMode = settings.qr.mode;
                 }
                 // Load advanced settings
+                if (settings.qr.logoSource) elements.qrLogoSource.value = settings.qr.logoSource;
                 if (settings.qr.logoUrl !== undefined) elements.qrLogoUrl.value = settings.qr.logoUrl;
                 if (settings.qr.logoSize) {
                     elements.qrLogoSize.value = settings.qr.logoSize;
@@ -617,6 +675,16 @@ const App = (() => {
 
     // Private: Setup logo input handlers (URL and file upload)
     function setupLogoInputs() {
+        // Logo source selector
+        elements.qrLogoSource.addEventListener('change', () => {
+            updateLogoSourceVisibility();
+            updateLogoSizeVisibility();
+            if (elements.qrUrlInput.value.trim()) {
+                updateQRCodePreview();
+            }
+            saveSettings();
+        });
+
         // Logo URL input
         const debouncedLogoUrlUpdate = debounce(() => {
             updateLogoSizeVisibility();
@@ -764,6 +832,8 @@ const App = (() => {
             }
         }
 
+        // Show/hide logo input groups based on source
+        updateLogoSourceVisibility();
         // Show logo size group if any logo source is present
         updateLogoSizeVisibility();
     }
