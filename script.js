@@ -17,16 +17,6 @@ const App = (() => {
     // Private: Logo image data URL
     let logoImageData = null;
 
-    // Private: Default values for Advanced mode
-    const ADVANCED_DEFAULTS = {
-        dotStyle: 'extra-rounded',
-        cornerSquareStyle: 'extra-rounded',
-        cornerDotStyle: 'dot',
-        gradientType: 'linear',
-        gradientColor1: '#ffa033',
-        gradientColor2: '#895220'
-    };
-
     // Private: QRCodeStyling instance
     let qrCodeStylingInstance = null;
 
@@ -97,7 +87,6 @@ const App = (() => {
         gradientColors: document.getElementById('gradient-colors'),
         qrGradientColor1: document.getElementById('qr-gradient-color1'),
         qrGradientColor2: document.getElementById('qr-gradient-color2'),
-        resetAdvancedBtn: document.getElementById('reset-advanced'),
         // Overlay elements
         overlayTitleInput: document.getElementById('overlay-title'),
         overlayBgColorInput: document.getElementById('overlay-bg-color'),
@@ -145,32 +134,6 @@ const App = (() => {
     function updateLogoSizeVisibility() {
         const hasLogo = getEffectiveLogo();
         elements.logoSizeGroup.style.display = hasLogo ? 'block' : 'none';
-    }
-
-    // Private: Reset Advanced mode settings to defaults
-    function resetAdvancedSettings() {
-        // Apply default values to form elements
-        elements.qrDotStyle.value = ADVANCED_DEFAULTS.dotStyle;
-        elements.qrCornerSquareStyle.value = ADVANCED_DEFAULTS.cornerSquareStyle;
-        elements.qrCornerDotStyle.value = ADVANCED_DEFAULTS.cornerDotStyle;
-        elements.qrGradientType.value = ADVANCED_DEFAULTS.gradientType;
-        elements.qrGradientColor1.value = ADVANCED_DEFAULTS.gradientColor1;
-        elements.qrGradientColor2.value = ADVANCED_DEFAULTS.gradientColor2;
-
-        // Show gradient colors since default is linear gradient
-        if (ADVANCED_DEFAULTS.gradientType !== 'none') {
-            elements.gradientColors.classList.remove('hidden');
-        } else {
-            elements.gradientColors.classList.add('hidden');
-        }
-
-        // Re-generate preview if URL exists
-        if (elements.qrUrlInput.value.trim()) {
-            updateQRCodePreview();
-        }
-
-        // Save settings
-        saveSettings();
     }
 
     // Private: URL validation with security checks
@@ -777,9 +740,6 @@ const App = (() => {
             const filename = sanitizeFilename(title) + '_overlay.png';
             downloadCanvas(elements.overlayCanvas, filename);
         });
-
-        // Reset Advanced mode settings button
-        elements.resetAdvancedBtn.addEventListener('click', resetAdvancedSettings);
 
     }
 

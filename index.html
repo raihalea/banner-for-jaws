@@ -103,10 +103,7 @@
 
             <!-- Advanced Mode Controls -->
             <div id="advanced-controls" class="advanced-controls hidden">
-                <div class="advanced-header">
-                    <h3 class="advanced-section-title">✨ Advanced Styling Options</h3>
-                    <button type="button" id="reset-advanced" class="btn-reset" aria-label="Reset advanced settings to defaults">Reset</button>
-                </div>
+                <h3 class="advanced-section-title">✨ Advanced Styling Options</h3>
                 
                 <div class="form-group">
                     <label for="qr-logo-url">Logo URL</label>
@@ -134,10 +131,10 @@
                     <div class="form-group">
                         <label for="qr-dot-style">Dot Style</label>
                         <select id="qr-dot-style">
-                            <option value="square">Square</option>
+                            <option value="square" selected>Square</option>
                             <option value="dots">Dots (Circle)</option>
                             <option value="rounded">Rounded</option>
-                            <option value="extra-rounded" selected>Extra Rounded</option>
+                            <option value="extra-rounded">Extra Rounded</option>
                             <option value="classy">Classy</option>
                             <option value="classy-rounded">Classy Rounded</option>
                         </select>
@@ -146,9 +143,9 @@
                     <div class="form-group">
                         <label for="qr-corner-square-style">Corner Square Style</label>
                         <select id="qr-corner-square-style">
-                            <option value="square">Square</option>
+                            <option value="square" selected>Square</option>
                             <option value="dot">Dot</option>
-                            <option value="extra-rounded" selected>Extra Rounded</option>
+                            <option value="extra-rounded">Extra Rounded</option>
                         </select>
                     </div>
                 </div>
@@ -157,30 +154,30 @@
                     <div class="form-group">
                         <label for="qr-corner-dot-style">Corner Dot Style</label>
                         <select id="qr-corner-dot-style">
-                            <option value="square">Square</option>
-                            <option value="dot" selected>Dot</option>
+                            <option value="square" selected>Square</option>
+                            <option value="dot">Dot</option>
                         </select>
                     </div>
 
                     <div class="form-group">
                         <label for="qr-gradient-type">Color Type</label>
                         <select id="qr-gradient-type">
-                            <option value="none">Solid Color</option>
-                            <option value="linear" selected>Linear Gradient</option>
+                            <option value="none" selected>Solid Color</option>
+                            <option value="linear">Linear Gradient</option>
                             <option value="radial">Radial Gradient</option>
                         </select>
                     </div>
                 </div>
 
-                <div id="gradient-colors" class="form-row">
+                <div id="gradient-colors" class="form-row hidden">
                     <div class="form-group">
                         <label for="qr-gradient-color1">Gradient Start Color</label>
-                        <input type="color" id="qr-gradient-color1" value="#ffa033" aria-label="Gradient start color">
+                        <input type="color" id="qr-gradient-color1" value="#6366f1" aria-label="Gradient start color">
                     </div>
 
                     <div class="form-group">
                         <label for="qr-gradient-color2">Gradient End Color</label>
-                        <input type="color" id="qr-gradient-color2" value="#895220" aria-label="Gradient end color">
+                        <input type="color" id="qr-gradient-color2" value="#a855f7" aria-label="Gradient end color">
                     </div>
                 </div>
             </div>
