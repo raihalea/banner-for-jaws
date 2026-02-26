@@ -546,3 +546,34 @@ input[type="file"]::file-selector-button:hover {
 #gradient-colors.hidden {
     display: none;
 }
+
+/* Advanced Header with Reset Button */
+.advanced-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+}
+
+.advanced-header .advanced-section-title {
+    margin-bottom: 0;
+}
+
+.btn-reset {
+    padding: 0.5rem 1rem;
+    background: var(--secondary-color);
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.btn-reset:hover {
+    background: var(--secondary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(100, 116, 139, 0.4);
+}
