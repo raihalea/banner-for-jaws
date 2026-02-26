@@ -145,12 +145,18 @@ const App = (() => {
         ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
         ctx.fill();
 
-        // Text
+        // Text - maximize size to fill the circle
         ctx.fillStyle = '#000000';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        const fontSize = text.length <= 2 ? Math.floor(size * 0.45) : Math.floor(size * 0.3);
-        ctx.font = `bold ${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+        const targetWidth = size * 0.82;
+        let fontSize = Math.floor(size * 0.7);
+        ctx.font = `900 ${fontSize}px sans-serif`;
+        const measured = ctx.measureText(text);
+        if (measured.width > targetWidth) {
+            fontSize = Math.floor(fontSize * (targetWidth / measured.width));
+            ctx.font = `900 ${fontSize}px sans-serif`;
+        }
         ctx.fillText(text, size / 2, size / 2);
 
         const dataUrl = canvas.toDataURL('image/png');
